@@ -1,0 +1,28 @@
+@font-face {
+  font-family: 'Lato';
+  src: url('../resources/fonts/lato-light.woff');
+}
+html {
+	background-image: url("../resources/images/bg.png")
+}
+
+.main {
+	margin-left:40%;
+	margin-right:40%;
+	margin-top: 10%;
+	min-width:20%;
+	min-height:60%;
+	background:#e7e7e7;
+	box-shadow: 5px 5px 10px #229ad2;
+	border-radius: 25px;
+}
+.form {
+	font-family: Lato;
+	font-size: 20px;
+	margin-left:5%;
+}
+.username {
+	margin-top:20%;
+	margin-bottom:5%;
+}
+/*Text*/
