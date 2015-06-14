@@ -12,6 +12,9 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
 	// }
 	document.getElementsByClassName('username')[0].value = null;
 	document.getElementsByClassName('ip')[0].value = null;
+
+	var element = document.getElementById("login");
+	element.parentNode.removeChild(element);
 	/*
 	connectServer(ip);
 	*/
