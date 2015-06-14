@@ -58,29 +58,68 @@ function movement(x,y) {
 	coordinate = [coordinate[0] + y, coordinate[1] + x];
 }
 
-
 document.onkeydown = movePlayer;
 /* Put this stuff server side to prevent hax later */
 function movePlayer(e) { //Also moves player
 
     e = e || window.event;
-
+    var olde = e.keyCode;
     switch(e.keyCode) {
     	//up
-    	case 38:
-    		movement(0,-1);
+    	case 38: 
+    		timer1();
+    		function timer1() {
+    			setTimeout(function() {
+    			movement(0,-1);
+    			console.log(e.keyCode);
+    			console.log(olde);
+    			if(e.keyCode === olde) {
+    				timer1();
+    			}	
+    		}, 250);
+    	}
     		break;
     	//down
     	case 40:
-    		movement(0,1);
+    	timer2();
+    		function timer2() {
+    			setTimeout(function() {
+    			movement(0,1);
+    			console.log(e.keyCode);
+    			console.log(olde);
+    			if(e.keyCode === olde) {
+    				timer2();
+    			}	
+    		}, 250);
+    	}
     		break;
     	//left
     	case 37:
-    		movement(-1,0);
+    		timer3();
+    		function timer3() {
+    			setTimeout(function() {
+    			movement(-1,0);
+    			console.log(e.keyCode);
+    			console.log(olde);
+    			if(e.keyCode === olde) {
+    				timer3();
+    			}	
+    		}, 250);
+    	}
     		break;
     	//right
     	case 39:
-    		movement(1,0);
+    		timer4();
+    		function timer4() {
+    			setTimeout(function() {
+    			movement(1,0);
+    			console.log(e.keyCode);
+    			console.log(olde);
+    			if(e.keyCode === olde) {
+    				timer4();
+    			}	
+    		}, 250);
+    	}
     		break;
     	default:
     		break;
