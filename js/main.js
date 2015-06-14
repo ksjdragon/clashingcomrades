@@ -15,8 +15,25 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
 
 	var element = document.getElementById("login");
 	element.parentNode.removeChild(element);
+	tableCreate();
+
 	/*
 	connectServer(ip);
 	*/
 }
 
+function tableCreate(){
+    var body = document.body,
+        tbl  = document.createElement('table');
+    tbl.style.width  = '100px';
+    tbl.style.border = "1px solid black";
+
+    for(var i = 0; i < 20; i++){
+        var tr = tbl.insertRow();
+        for(var j = 0; j < 30; j++){
+                var td = tr.insertCell();
+                td.appendChild(document.createTextNode('Cell'));
+        }
+    }
+    body.appendChild(tbl);
+}
