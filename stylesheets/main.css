@@ -9,6 +9,10 @@ td {
 	min-width: 100px;
 	height: 100px;
 	background-color: cornflowerblue;
+	transition: background-color 5s ease;
+}
+.player {
+	transition: background-color 0s ease
 }
 
 .main {

@@ -1,6 +1,7 @@
 var coordinate;
+var username;
 document.getElementsByClassName('play')[0].onclick = function startGame() {
-	var username = document.getElementsByClassName('username')[0].value;
+	username = document.createTextNode(document.getElementsByClassName('username')[0].value)
 	// Server Stuff, not necessary now.
 	// var ip = document.getElementsByClassName('ip')[0].value;
 	// console.log(ip);
@@ -37,38 +38,51 @@ function tableCreate() {
     }
     body.appendChild(tbl);
 }
-function createPlayer(username) {
+function createPlayer() {
 	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "red"
-	var username1 = document.createTextNode(username);
-	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].appendChild(username1)
+	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "player"
+	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].appendChild(username)
 }
-document.onkeydown = checkKey;
-function checkKey(e) { //Also moves player
+document.onkeydown = movePlayer;
+/* Put this stuff server side to prevent hax later */
+function movePlayer(e) { //Also moves player
 
     e = e || window.event;
 
     switch(e.keyCode) {
     	case 38:
     		console.log("up");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0] - 1].cells[coordinate[1]].style.backgroundColor = "red"
+    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
+    		document.getElementsByTagName('table')[0].rows[coordinate[0] - 1].cells[coordinate[1]].className = "player";
+    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+    		document.getElementsByClassName('player')[0].appendChild(username);
     		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
     		coordinate = [coordinate[0] - 1, coordinate[1]];
     		break;
     	case 40:
     		console.log("down");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0] + 1].cells[coordinate[1]].style.backgroundColor = "red"
+    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
+    		document.getElementsByTagName('table')[0].rows[coordinate[0] + 1].cells[coordinate[1]].className = "player";
+    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+    		document.getElementsByClassName('player')[0].appendChild(username);
     		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
     		coordinate = [coordinate[0] + 1, coordinate[1]]
     		break;
     	case 37:
     		console.log("left");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1] - 1].style.backgroundColor = "red"
+    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
+    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1] - 1].className = "player"
+    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+    		document.getElementsByClassName('player')[0].appendChild(username);
     		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
     		coordinate = [coordinate[0], coordinate[1] - 1]
     		break;
     	case 39:
     		console.log("right");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1] + 1].style.backgroundColor = "red"
+    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
+    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1] + 1].className = "player"
+    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+    		document.getElementsByClassName('player')[0].appendChild(username);
     		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
     		coordinate = [coordinate[0], coordinate[1] + 1]
     		break;
