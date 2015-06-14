@@ -37,11 +37,22 @@ function tableCreate() {
         }
     }
     body.appendChild(tbl);
+    table = document.getElementsByTagName('table')[0];
 }
 function createPlayer() {
-	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "red"
-	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "player"
-	document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].appendChild(username)
+	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "red"
+	table.rows[coordinate[0]].cells[coordinate[1]].className = "player"
+	table.rows[coordinate[0]].cells[coordinate[1]].appendChild(username)
+}
+
+//add argument "team" to differentiate what color to set
+function movement(x,y) {
+	table.rows[coordinate[0]].cells[coordinate[1]].className = "";
+	table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
+	document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+	document.getElementsByClassName('player')[0].appendChild(username);
+	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FF3B3B";
+	coordinate = [coordinate[0] + y, coordinate[1] + x];
 }
 document.onkeydown = movePlayer;
 /* Put this stuff server side to prevent hax later */
@@ -52,39 +63,19 @@ function movePlayer(e) { //Also moves player
     switch(e.keyCode) {
     	case 38:
     		console.log("up");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
-    		document.getElementsByTagName('table')[0].rows[coordinate[0] - 1].cells[coordinate[1]].className = "player";
-    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
-    		document.getElementsByClassName('player')[0].appendChild(username);
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
-    		coordinate = [coordinate[0] - 1, coordinate[1]];
+    		movement(0,-1);
     		break;
     	case 40:
     		console.log("down");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
-    		document.getElementsByTagName('table')[0].rows[coordinate[0] + 1].cells[coordinate[1]].className = "player";
-    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
-    		document.getElementsByClassName('player')[0].appendChild(username);
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
-    		coordinate = [coordinate[0] + 1, coordinate[1]]
+    		movement(0,1);
     		break;
     	case 37:
     		console.log("left");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1] - 1].className = "player"
-    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
-    		document.getElementsByClassName('player')[0].appendChild(username);
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
-    		coordinate = [coordinate[0], coordinate[1] - 1]
+    		movement(-1,0);
     		break;
     	case 39:
     		console.log("right");
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].className = "";
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1] + 1].className = "player"
-    		document.getElementsByClassName('player')[0].style.backgroundColor = "red";
-    		document.getElementsByClassName('player')[0].appendChild(username);
-    		document.getElementsByTagName('table')[0].rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = null;
-    		coordinate = [coordinate[0], coordinate[1] + 1]
+    		movement(1,0);
     		break;
     	default:
     		break;
