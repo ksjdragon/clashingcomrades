@@ -27,12 +27,10 @@ function tableCreate(){
         tbl  = document.createElement('table');
     tbl.style.border = "1px solid black";
 
-    for(var i = 0; i < 20; i++){
+    for(var i = 0; i < 5; i++){
         var tr = tbl.insertRow();
-        for(var j = 0; j < 30; j++){
+        for(var j = 0; j < 10; j++){
                 var td = tr.insertCell();
-                td.appendChild();
-
         }
     }
     body.appendChild(tbl);
