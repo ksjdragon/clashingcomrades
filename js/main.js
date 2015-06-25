@@ -1,5 +1,6 @@
 var coordinate;
 var username;
+var timer;
 document.getElementsByClassName('play')[0].onclick = function startGame() {
 	username = document.createTextNode(document.getElementsByClassName('username')[0].value)
 	coordinate = [0,0]
@@ -41,7 +42,7 @@ function tableCreate() {
     body.appendChild(tbl);
     table = document.getElementsByTagName('table')[0];
 }
-
+//Creation of Player
 function createPlayer() {
 	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "red"
 	table.rows[coordinate[0]].cells[coordinate[1]].className = "player"
@@ -50,76 +51,44 @@ function createPlayer() {
 
 //add argument "team" to differentiate what color to set
 function movement(x,y) {
-	table.rows[coordinate[0]].cells[coordinate[1]].className = "";
-	table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
-	document.getElementsByClassName('player')[0].style.backgroundColor = "red";
-	document.getElementsByClassName('player')[0].appendChild(username);
-	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FC9D9D";
-	coordinate = [coordinate[0] + y, coordinate[1] + x];
-}
+    timer = 
+        setTimeout(function() {
+        	table.rows[coordinate[0]].cells[coordinate[1]].className = "";
+        	table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
+        	document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+            document.getElementsByClassName('player')[0].appendChild(username);
+        	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FC9D9D";
+        	coordinate = [coordinate[0] + y, coordinate[1] + x];
+            movement(x,y);
+        }, 175);
 
+}
 document.onkeydown = movePlayer;
-/* Put this stuff server side to prevent hax later */
-function movePlayer(e) { //Also moves player
+/* Put this stuff server side to prevent H4X (Arav) later */
+function movePlayer(e) { 
 
     e = e || window.event;
-    var olde = e.keyCode;
+
     switch(e.keyCode) {
     	//up
-    	case 38: 
-    		timer1();
-    		function timer1() {
-    			setTimeout(function() {
-    			movement(0,-1);
-    			console.log(e.keyCode);
-    			console.log(olde);
-    			if(e.keyCode === olde) {
-    				timer1();
-    			}	
-    		}, 250);
-    	}
+    	case 38:
+            clearTimeout(timer);
+    		movement(0,-1);
     		break;
     	//down
     	case 40:
-    	timer2();
-    		function timer2() {
-    			setTimeout(function() {
-    			movement(0,1);
-    			console.log(e.keyCode);
-    			console.log(olde);
-    			if(e.keyCode === olde) {
-    				timer2();
-    			}	
-    		}, 250);
-    	}
+            clearTimeout(timer);
+    		movement(0,1);
     		break;
     	//left
     	case 37:
-    		timer3();
-    		function timer3() {
-    			setTimeout(function() {
-    			movement(-1,0);
-    			console.log(e.keyCode);
-    			console.log(olde);
-    			if(e.keyCode === olde) {
-    				timer3();
-    			}	
-    		}, 250);
-    	}
+            clearTimeout(timer);
+    		movement(-1,0);
     		break;
     	//right
     	case 39:
-    		timer4();
-    		function timer4() {
-    			setTimeout(function() {
-    			movement(1,0);
-    			console.log(e.keyCode);
-    			console.log(olde);
-    			if(e.keyCode === olde) {
-    				timer4();
-    			}	
-    		}, 250);
-    	}
+            clearTimeout(timer);
+    		movement(1,0);
     		break;
     	default:
     		break;
