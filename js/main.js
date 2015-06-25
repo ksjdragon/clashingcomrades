@@ -53,14 +53,18 @@ function createPlayer() {
 function movement(x,y) {
     timer = 
         setTimeout(function() {
-        	table.rows[coordinate[0]].cells[coordinate[1]].className = "";
-        	table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
-        	document.getElementsByClassName('player')[0].style.backgroundColor = "red";
-            document.getElementsByClassName('player')[0].appendChild(username);
-        	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FC9D9D";
-        	coordinate = [coordinate[0] + y, coordinate[1] + x];
-            movement(x,y);
-        }, 175);
+            try {
+            	table.rows[coordinate[0]].cells[coordinate[1]].className = "";
+            	table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
+            	document.getElementsByClassName('player')[0].style.backgroundColor = "red";
+                document.getElementsByClassName('player')[0].appendChild(username);
+            	table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FC9D9D";
+            	coordinate = [coordinate[0] + y, coordinate[1] + x];
+                movement(x,y);
+            }
+            catch(err) {
+            }
+        }, 150);
 
 }
 document.onkeydown = movePlayer;
