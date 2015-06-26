@@ -66,9 +66,9 @@ function movement(x,y) {
             	document.getElementsByClassName('player')[0].style.backgroundColor = team;
                 document.getElementsByClassName('player')[0].appendChild(username);
                 if(team === "red") {
-            	   table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FC9D9D";
+            	   table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FF9999";
                 } else if(team === "blue") {
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "some other color that is a blue";
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#9999FF";
                 }
             	coordinate = [coordinate[0] + y, coordinate[1] + x];
                 movement(x,y);
