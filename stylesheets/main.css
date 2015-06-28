@@ -8,22 +8,17 @@ html {
 td {
 	min-width: 100px;
 	height: 100px;
-	background-color: cornflowerblue;
+	background-color: #2C3134;
 	transition: background-color 2s ease;
 }
 .player {
 	transition: background-color 0s ease
 }
-
-.red {
-	background-color: #FC9D9D;
-}
-
 .main {
 	margin-left:40%;
 	margin-right:40%;
 	margin-top: 10%;
-	min-width:20%;
+	min-width:20%;g
 	min-height:60%;
 	background:#e7e7e7;
 	box-shadow: 5px 5px 10px #229ad2;
@@ -38,4 +33,3 @@ td {
 	margin-top:20%;
 	margin-bottom:5%;
 }
-/*Text*/
