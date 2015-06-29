@@ -5,6 +5,14 @@ var team;
 var mode;
 var timer;
 var type;
+var playerCol;
+var claimCol;
+/* End */
+/* Colors */
+var redPlayer = "#E62E2E"
+var redClaimed = "#FF9999"
+var bluePlayer = "#4343D8"
+var blueClaimed = "#9999FF"
 /* End */
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
@@ -13,6 +21,13 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     coordinate = [0,0]
     team = "red"
     /* end */
+    if(team === "red") {
+        playerCol = redPlayer;
+        claimCol = redClaimed;
+    } else {
+        playerCol = bluePlayer;
+        claimCol = blueClaimed;
+    }
 
     // Server Stuff, not necessary now.
     // var ip = document.getElementsByClassName('ip')[0].value;
@@ -32,7 +47,6 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     mode = "ingame"
     tableCreate();
     createPlayer(username);
-
 
     /*
     connectServer(ip);
@@ -63,7 +77,7 @@ function tableCreate() {
 /**********************/
 
 function createPlayer() {
-    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = team;
+    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerCol;
     table.rows[coordinate[0]].cells[coordinate[1]].className = "player";
     table.rows[coordinate[0]].cells[coordinate[1]].appendChild(username);
 }
@@ -73,20 +87,18 @@ function movement(x,y) {
         setTimeout(function() {
             try {
                 if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].id === team) {
-                    mode = "spectator"
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimCol;
+                    document.getElementsByClassName('player')[0].className = "";
+                    //mode = "spectator"
                     spectatorMode();
                 }
-                else if(mode != "spectator") {
+                else if(mode !== "spectator") {
                     table.rows[coordinate[0]].cells[coordinate[1]].className = "";
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].id = team;
-                    document.getElementsByClassName('player')[0].style.backgroundColor = team;
+                    document.getElementsByClassName('player')[0].style.backgroundColor = playerCol;
                     document.getElementsByClassName('player')[0].appendChild(username);
-                    if(team === "red") {
-                       table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#FF9999";
-                    } else if(team === "blue") {
-                        table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = "#9999FF";
-                    }
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimCol;
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
                     movement(x,y);
                 }
@@ -98,7 +110,9 @@ function movement(x,y) {
 document.onkeydown = movePlayer;
 
 function movePlayer(e) {
+
     e = e || window.event;
+
     if(e.keyCode === 38 && type != "up") {
         type = "up";
         clearTimeout(timer);
