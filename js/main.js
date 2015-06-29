@@ -2,6 +2,7 @@
 var coordinate;
 var username;
 var team;
+var mode;
 var timer;
 var type;
 /* End */
@@ -28,8 +29,10 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
 
     var element = document.getElementById("login");
     element.parentNode.removeChild(element);
+    mode = "ingame"
     tableCreate();
     createPlayer(username);
+
 
     /*
     connectServer(ip);
@@ -70,12 +73,10 @@ function movement(x,y) {
         setTimeout(function() {
             try {
                 if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].id === team) {
-                    lose = 1;
-                    console.log('you died');
-                    table.rows[coordinate[0]].cells[coordinate[1]].className = "";
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "";
+                    mode = "spectator"
+                    spectatorMode();
                 }
-                else {
+                else if(mode != "spectator") {
                     table.rows[coordinate[0]].cells[coordinate[1]].className = "";
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].id = team;
@@ -89,18 +90,15 @@ function movement(x,y) {
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
                     movement(x,y);
                 }
-
             }
             catch(err) {
             }
-        }, 150);
+        }, 100);
 }
 document.onkeydown = movePlayer;
 
 function movePlayer(e) {
-
     e = e || window.event;
-
     if(e.keyCode === 38 && type != "up") {
         type = "up";
         clearTimeout(timer);
@@ -120,4 +118,9 @@ function movePlayer(e) {
         clearTimeout(timer);
         movement(1,0);
     }
+}
+
+function spectatorMode() {
+    coordinate = null;
+    /* once in server side add stuff about following players */
 }
