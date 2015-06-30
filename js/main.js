@@ -1,32 +1,30 @@
-/*Global Variables */
+/* Global Variables */
 var coordinate;
 var username;
 var team;
-var mode;
 var timer;
 var type;
-var playerCol;
-var claimCol;
+var playerColor;
+var claimColor;
 /* End */
 /* Colors */
-var redPlayer = "#E62E2E"
-var redClaimed = "#FF9999"
-var bluePlayer = "#4343D8"
-var blueClaimed = "#9999FF"
+var redPlayer = "#E62E2E";
+var redClaimed = "#FF9999";
+var bluePlayer = "#4343D8";
+var blueClaimed = "#9999FF";
 /* End */
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
-    username = document.createTextNode(document.getElementsByClassName('username')[0].value)
     /* get this from server later */
-    coordinate = [0,0]
-    team = "red"
+    coordinate = [0,0];
+    team = "red";
     /* end */
     if(team === "red") {
-        playerCol = redPlayer;
-        claimCol = redClaimed;
+        playerColor = redPlayer;
+        claimColor = redClaimed;
     } else {
-        playerCol = bluePlayer;
-        claimCol = blueClaimed;
+        playerColor = bluePlayer;
+        claimColor = blueClaimed;
     }
 
     // Server Stuff, not necessary now.
@@ -39,18 +37,25 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //  ip = retrieveServerIPs('array')[Math.floor((Math.random() * retrieveServerIPs('amount')) + 1)];
     //  */
     // }
-    document.getElementsByClassName('username')[0].value = null;
-    document.getElementsByClassName('ip')[0].value = null;
 
     var element = document.getElementById("login");
     element.parentNode.removeChild(element);
-    mode = "ingame"
-    tableCreate();
-    createPlayer(username);
 
+    var scoreboard = document.getElementsByTagName('body')[0].appendChild(document.createElement("DIV"));
+    scoreboard.className = 'scoreboard';
+    scoreboard.appendChild(document.createTextNode(""));
+    scoreboard.appendChild(document.createElement("BR"));
+    scoreboard.appendChild(document.createTextNode(""));
+    updateScore();
+    tableCreate();
+    createPlayer();
     /*
     connectServer(ip);
     */
+}
+
+function getPlayers() {
+    /******* Add recursive calling for: update other players, scoreboard updating *************/
 }
 
 /*********************/
@@ -62,9 +67,9 @@ function tableCreate() {
     var tbl  = document.createElement('table');
     tbl.style.border = "1px solid black";
 
-    for(var i = 0; i < 5; i++) {
+    for(var i = 0; i < 20; i++) {
         var tr = tbl.insertRow();
-        for(var j = 0; j < 10; j++) {
+        for(var j = 0; j < 30; j++) {
             var td = tr.insertCell();
         }
     }
@@ -77,29 +82,27 @@ function tableCreate() {
 /**********************/
 
 function createPlayer() {
-    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerCol;
-    table.rows[coordinate[0]].cells[coordinate[1]].className = "player";
-    table.rows[coordinate[0]].cells[coordinate[1]].appendChild(username);
+    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColor;
+    table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
 }
 /* Put this stuff server side to prevent H4X (Arav) later */
 function movement(x,y) {
     timer =
         setTimeout(function() {
             try {
-                if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].id === team) {
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimCol;
+                if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].className.includes(team)) {
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
                     document.getElementsByClassName('player')[0].className = "";
-                    //mode = "spectator"
                     spectatorMode();
                 }
-                else if(mode !== "spectator") {
-                    table.rows[coordinate[0]].cells[coordinate[1]].className = "";
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player";
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].id = team;
-                    document.getElementsByClassName('player')[0].style.backgroundColor = playerCol;
-                    document.getElementsByClassName('player')[0].appendChild(username);
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimCol;
+                else {
+                    table.rows[coordinate[0]].cells[coordinate[1]].className = table.rows[coordinate[0]].cells[coordinate[1]].className.replace("player ", "");
+                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player ";
+                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].className += team;
+                    document.getElementsByClassName('player')[0].style.backgroundColor = playerColor;
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
+                    updateScore(); // remove this after server updating
                     movement(x,y);
                 }
             }
@@ -137,4 +140,13 @@ function movePlayer(e) {
 function spectatorMode() {
     coordinate = null;
     /* once in server side add stuff about following players */
+}
+function updateScore() {
+    var score = 
+    [
+    document.getElementsByClassName('red').length,
+    document.getElementsByClassName('blue').length
+    ];
+    document.getElementsByClassName('scoreboard')[0].childNodes[0].nodeValue = "Red: " + score[0];
+    document.getElementsByClassName('scoreboard')[0].childNodes[2].nodeValue = "Blue: " + score[1];
 }
