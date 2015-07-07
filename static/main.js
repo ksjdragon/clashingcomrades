@@ -78,9 +78,6 @@ function serverTransfer(coordinate,team,turn) {
     );
 }
 
-
-
-
  // Creation of Table 
 
 function tableCreate() {
@@ -98,8 +95,6 @@ function tableCreate() {
     table = document.getElementsByTagName('table')[0];
 }
 
-
-
  // Creation of Player 
 
 function createPlayer() {
@@ -107,12 +102,12 @@ function createPlayer() {
     table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
 }
 
-
 function movement(x,y) {
     timer =
         setTimeout(function() {
             try {
                 if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].className.includes(team)) {
+                    //Kills Player
                     table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
                     document.getElementsByClassName('player')[0].className = "";
                     spectatorMode();
@@ -131,6 +126,10 @@ function movement(x,y) {
                 }
             }
             catch(err) {
+                //Kills Player
+                table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
+                document.getElementsByClassName('player')[0].className = "";
+                spectatorMode();
             }
         }, 100);
 }
