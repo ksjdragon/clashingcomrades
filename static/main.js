@@ -1,4 +1,4 @@
-/* Global Variables */
+//Global Variables 
 var coordinate;
 var username;
 var team;
@@ -6,13 +6,13 @@ var timer;
 var type;
 var playerColor;
 var claimColor;
-/* End */
-/* Colors */
+var turn = 1;
+//Colors 
 var redPlayer = "#E62E2E";
 var redClaimed = "#FF9999";
 var bluePlayer = "#4343D8";
 var blueClaimed = "#9999FF";
-/* End */
+
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
     /* get this from server later */
@@ -58,6 +58,34 @@ function getPlayers() {
     /******* Add recursive calling for: update other players, scoreboard updating *************/
 }
 
+function serverTransfer(coordinate,team,turn) {
+    var move = {
+        coordinate: coordinate,
+        team: team,
+        turn: turn
+    };
+    console.log(move);
+    $.ajax('http://127.0.0.1:5000/game', {
+        method: 'POST',
+        type : "POST",
+        data: JSON.stringify(move, null, '\t'),
+        dataType: "json",
+        contentType: 'application/json;charset=UTF-8'
+    })
+    .then(
+        function success(data) {
+            //Kenny Do it
+            console.log(data);
+        },
+
+        function fail(data, status) {
+            alert('Request failed.  Returned status of ' + status);
+        }
+    );
+}
+
+
+
 /*********************/
 /* Creation of Table */
 /*********************/
@@ -85,6 +113,8 @@ function createPlayer() {
     table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColor;
     table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
 }
+
+
 /* Put this stuff server side to prevent H4X (Arav) later */
 function movement(x,y) {
     timer =
@@ -103,6 +133,8 @@ function movement(x,y) {
                     table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
                     updateScore(); // remove this after server updating
+                    serverTransfer(coordinate,team,turn);
+                    turn = turn + 1;
                     movement(x,y);
                 }
             }

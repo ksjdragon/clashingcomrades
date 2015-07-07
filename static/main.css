@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'Lato';
-  src: url('../resources/fonts/lato-light.woff');
+  src: url('../static/resources/fonts/lato-light.woff');
 }
 html {
-	background-image: url("../resources/images/bg.png")
+	background-image: url("../static/resources/images/bg.png")
 }
 td {
 	min-width: 100px;
