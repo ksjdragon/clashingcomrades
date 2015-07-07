@@ -15,28 +15,25 @@ var blueClaimed = "#9999FF";
 
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
-    /* get this from server later */
+
+    //*********************
+    // TODO Get from server
+    //********************* 
     coordinate = [0,0];
     team = "red";
-    /* end */
-    if(team === "red") {
+
+    if (team === "red") {
         playerColor = redPlayer;
         claimColor = redClaimed;
-    } else {
+    } else if (team === "blue") {
         playerColor = bluePlayer;
         claimColor = blueClaimed;
+    } else {
+        playerColor = null;
+        claimColor = null;
     }
 
-    // Server Stuff, not necessary now.
-    // var ip = document.getElementsByClassName('ip')[0].value;
-    // console.log(ip);
-    // console.log(username);
-    // if (ip.match(/[a-z]/i) /* && list of ips */ || ip === "") {
-    //  alert("That wasn't a valid ip, so we picked a random one for you!");
-    //  /*
-    //  ip = retrieveServerIPs('array')[Math.floor((Math.random() * retrieveServerIPs('amount')) + 1)];
-    //  */
-    // }
+    // TODO IP Handling, most likely not necessary
 
     var element = document.getElementById("login");
     element.parentNode.removeChild(element);
@@ -49,13 +46,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     updateScore();
     tableCreate();
     createPlayer();
-    /*
-    connectServer(ip);
-    */
-}
-
-function getPlayers() {
-    /******* Add recursive calling for: update other players, scoreboard updating *************/
+    document.onkeydown = movePlayer;
 }
 
 function serverTransfer(coordinate,team,turn) {
@@ -64,6 +55,7 @@ function serverTransfer(coordinate,team,turn) {
         team: team,
         turn: turn
     };
+    // For debugging
     console.log(move);
     $.ajax('http://127.0.0.1:5000/game', {
         method: 'POST',
@@ -74,7 +66,9 @@ function serverTransfer(coordinate,team,turn) {
     })
     .then(
         function success(data) {
-            //Kenny Do it
+            //*******************************
+            // TODO Use moves given by server
+            //*******************************
             console.log(data);
         },
 
@@ -86,9 +80,8 @@ function serverTransfer(coordinate,team,turn) {
 
 
 
-/*********************/
-/* Creation of Table */
-/*********************/
+
+ // Creation of Table 
 
 function tableCreate() {
     var body = document.body
@@ -105,9 +98,9 @@ function tableCreate() {
     table = document.getElementsByTagName('table')[0];
 }
 
-/**********************/
-/* Creation of Player */
-/**********************/
+
+
+ // Creation of Player 
 
 function createPlayer() {
     table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColor;
@@ -115,7 +108,6 @@ function createPlayer() {
 }
 
 
-/* Put this stuff server side to prevent H4X (Arav) later */
 function movement(x,y) {
     timer =
         setTimeout(function() {
@@ -132,7 +124,7 @@ function movement(x,y) {
                     document.getElementsByClassName('player')[0].style.backgroundColor = playerColor;
                     table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
-                    updateScore(); // remove this after server updating
+                    updateScore();
                     serverTransfer(coordinate,team,turn);
                     turn = turn + 1;
                     movement(x,y);
@@ -142,7 +134,6 @@ function movement(x,y) {
             }
         }, 100);
 }
-document.onkeydown = movePlayer;
 
 function movePlayer(e) {
 
@@ -170,14 +161,16 @@ function movePlayer(e) {
 }
 
 function spectatorMode() {
+    //***************************
+    // TODO Finish Spectator Mode
+    //***************************
     coordinate = null;
-    /* once in server side add stuff about following players */
 }
+
 function updateScore() {
-    var score = 
-    [
-    document.getElementsByClassName('red').length,
-    document.getElementsByClassName('blue').length
+    var score = [
+        document.getElementsByClassName('red').length,
+        document.getElementsByClassName('blue').length
     ];
     document.getElementsByClassName('scoreboard')[0].childNodes[0].nodeValue = "Red: " + score[0];
     document.getElementsByClassName('scoreboard')[0].childNodes[2].nodeValue = "Blue: " + score[1];
