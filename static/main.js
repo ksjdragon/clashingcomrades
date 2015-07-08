@@ -39,11 +39,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     var login = document.getElementById("login");
     login.parentNode.removeChild(login);
 
-    var scoreboard = document.getElementsByTagName('body')[0].appendChild(document.createElement("DIV"));
-    scoreboard.className = 'scoreboard';
-    scoreboard.appendChild(document.createTextNode(""));
-    scoreboard.appendChild(document.createElement("BR"));
-    scoreboard.appendChild(document.createTextNode(""));
+    scoreboardCreate();
     updateScore();
     tableCreate();
     createPlayer();
@@ -85,7 +81,27 @@ function serverTransfer(coordinate,team,turn,username) {
     );
 }
 
- // Creation of Table 
+// Creation of Scoreboard
+
+function scoreboardCreate() {
+    var scoreboard = document.getElementsByTagName('body')[0].appendChild(document.createElement("DIV"));
+    scoreboard.className = 'scoreboard';
+    var redScore = scoreboard.appendChild(document.createElement("SPAN"));
+    redScore.id = "redscore";
+    var redNumber = scoreboard.appendChild(document.createElement("SPAN"));
+    redNumber.id = "rednumber";
+    redScore.appendChild(document.createTextNode("___"));
+    redNumber.appendChild(document.createTextNode(""));
+    scoreboard.appendChild(document.createElement("BR"));
+    var blueScore = scoreboard.appendChild(document.createElement("SPAN"));
+    blueScore.id = "bluescore";
+    var blueNumber = scoreboard.appendChild(document.createElement("SPAN"));
+    blueNumber.id = "bluenumber";
+    blueScore.appendChild(document.createTextNode("___"));
+    blueNumber.appendChild(document.createTextNode(""));
+}
+
+// Creation of Table 
 
 function tableCreate() {
     var body = document.body
@@ -189,6 +205,6 @@ function updateScore() {
         document.getElementsByClassName('red').length,
         document.getElementsByClassName('blue').length
     ];
-    document.getElementsByClassName('scoreboard')[0].childNodes[0].nodeValue = "Red: " + score[0];
-    document.getElementsByClassName('scoreboard')[0].childNodes[2].nodeValue = "Blue: " + score[1];
+    document.getElementById('rednumber').childNodes[0].nodeValue = " : " + score[0];
+    document.getElementById('bluenumber').childNodes[0].nodeValue = " : " + score[1];
 }
