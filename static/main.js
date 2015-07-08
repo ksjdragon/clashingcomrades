@@ -79,6 +79,8 @@ function serverTransfer(coordinate,team,turn,username) {
                     console.log(data[user][turn]);
                     var theMove = data[user][turn];
                     tableUpdate(theMove[1], theMove[2]);
+                    var oldMove = data[user][turn - 1];
+                    oldTableUpdate(oldMove[1], oldMove[2]);
                 }
             }
         },
@@ -113,9 +115,13 @@ function tableUpdate (coordinate, team) {
     current = table.rows[coordinate[0]].cells[coordinate[1]];
     current.className = "player ";
     current.className += team;
-    current.style.backgroundColor = playerColors[team]
+    current.style.backgroundColor = playerColors[team];
 }
 
+function oldTableUpdate(coordinate, team) {
+    current.className = current.className.replace("player ", "");
+    current.style.backgroundColor = claimedColors[team];
+}
 
 
  // Creation of Player 
