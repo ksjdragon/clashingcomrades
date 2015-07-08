@@ -23,13 +23,15 @@ def update_game():
 
     # What to do when the Client tells the server something
     if request.method == 'POST':
+        print "asdabsb"
         # Define the data given by client
         playerStatus = request.get_json(force=True)
-        # If the turn that the player sent is already defined in game
-        if playerStatus["turn"] in game:
-            game[playerStatus["turn"]].append([playerStatus["coordinate"], playerStatus["team"]])
+        # If the username that the player sent is already defined in game
+        if playerStatus["username"] in game:
+            game[playerStatus["username"]].append([playerStatus["turn"], playerStatus["coordinate"], playerStatus["team"]])
         else:
-            game[playerStatus["turn"]] = [[playerStatus["coordinate"], playerStatus["team"]]]
+            print "yesolkgahjewoiagj"
+            game[playerStatus["username"]] = [[playerStatus["turn"], playerStatus["coordinate"], playerStatus["team"]]]
         # Return the game with the information you added, in addition to everyone else
         return jsonify(game)
 

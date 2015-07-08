@@ -4,10 +4,19 @@ var username;
 var team;
 var timer;
 var type;
+var username;
 var playerColor;
 var claimColor;
-var turn = 1;
-//Colors 
+var turn = 0;
+//Colors
+var playerColors = {
+    "red": "#E62E2E",
+    "blue": "#4343D8"
+};
+var claimedColors = {
+    "red": "#FF9999",
+    "blue": "#9999FF"
+}
 var redPlayer = "#E62E2E";
 var redClaimed = "#FF9999";
 var bluePlayer = "#4343D8";
@@ -16,27 +25,27 @@ var blueClaimed = "#9999FF";
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
 
+    uuid4 = function() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, _uuid4);
+    };
+    //// OPTIMIZATION - cache callback
+    _uuid4 = function(cc) {
+        var rr = Math.random() * 16 | 0; return (cc === 'x' ? rr : (rr & 0x3 | 0x8)).toString(16);
+    };
+    username = uuid4()
     //*********************
     // TODO Get from server
     //********************* 
     coordinate = [0,0];
-    team = "red";
+    team = "blue";
 
-    if (team === "red") {
-        playerColor = redPlayer;
-        claimColor = redClaimed;
-    } else if (team === "blue") {
-        playerColor = bluePlayer;
-        claimColor = blueClaimed;
-    } else {
-        playerColor = null;
-        claimColor = null;
-    }
+    playerColor = playerColors[team];
+    claimColor = claimedColors[team];
 
     // TODO IP Handling, most likely not necessary
 
-    var element = document.getElementById("login");
-    element.parentNode.removeChild(element);
+    var login = document.getElementById("login");
+    login.parentNode.removeChild(login);
 
     var scoreboard = document.getElementsByTagName('body')[0].appendChild(document.createElement("DIV"));
     scoreboard.className = 'scoreboard';
@@ -49,11 +58,12 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     document.onkeydown = movePlayer;
 }
 
-function serverTransfer(coordinate,team,turn) {
+function serverTransfer(coordinate,team,turn,username) {
     var move = {
         coordinate: coordinate,
         team: team,
-        turn: turn
+        turn: turn,
+        username: username
     };
     // For debugging
     console.log(move);
@@ -69,7 +79,16 @@ function serverTransfer(coordinate,team,turn) {
             //*******************************
             // TODO Use moves given by server
             //*******************************
+
             console.log(data);
+
+            for (var user in data) {
+                if (data.hasOwnProperty(user)) {
+                    console.log(data[user][turn]);
+                    var theMove = data[user][turn];
+                    tableUpdate(theMove[1], theMove[2]);
+                }
+            }
         },
 
         function fail(data, status) {
@@ -98,6 +117,13 @@ function tableCreate() {
     table = document.getElementsByTagName('table')[0];
 }
 
+function tableUpdate (coordinate, team) {
+    current = table.rows[coordinate[0]].cells[coordinate[1]];
+    current.className = "player ";
+    current.className += team;
+    current.style.backgroundColor = playerColors[team]
+}
+
 
 
  // Creation of Player 
@@ -121,11 +147,11 @@ function movement(x,y) {
                     table.rows[coordinate[0]].cells[coordinate[1]].className = table.rows[coordinate[0]].cells[coordinate[1]].className.replace("player ", "");
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player ";
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].className += team;
-                    document.getElementsByClassName('player')[0].style.backgroundColor = playerColor;
+                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].style.backgroundColor = playerColor;
                     table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
                     updateScore();
-                    serverTransfer(coordinate,team,turn);
+                    serverTransfer(coordinate,team,turn,username);
                     turn = turn + 1;
                     movement(x,y);
                 }
