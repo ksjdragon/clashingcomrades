@@ -103,15 +103,14 @@ function tableCreate() {
 }
 
 function tableUpdate (coordinate, team) {
-    current = table.rows[coordinate[0]].cells[coordinate[1]];
-    current.className = "player ";
-    current.className += team;
-    current.style.backgroundColor = playerColors[team];
+    table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
+    table.rows[coordinate[0]].cells[coordinate[1]].className += team;
+    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColors[team];
 }
 
 function oldTableUpdate(coordinate, team) {
-    current.className = current.className.replace("player ", "");
-    current.style.backgroundColor = claimedColors[team];
+    table.rows[coordinate[0]].cells[coordinate[1]].className = table.rows[coordinate[0]].cells[coordinate[1]].className.replace("player ", "");
+    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimedColors[team];
 }
 
  // Creation of Player 
