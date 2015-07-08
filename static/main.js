@@ -68,14 +68,8 @@ function serverTransfer(coordinate,team,turn,username) {
     })
     .then(
         function success(data) {
-            //*******************************
-            // TODO Use moves given by server
-            //*******************************
-
-            console.log(data);
-
             for (var user in data) {
-                if (data.hasOwnProperty(user)) {
+                if (data.hasOwnProperty(user) && (user != username)) {
                     console.log(data[user][turn]);
                     var theMove = data[user][turn];
                     tableUpdate(theMove[1], theMove[2]);
