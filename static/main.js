@@ -17,11 +17,6 @@ var claimedColors = {
     "red": "#FF9999",
     "blue": "#9999FF"
 }
-var redPlayer = "#E62E2E";
-var redClaimed = "#FF9999";
-var bluePlayer = "#4343D8";
-var blueClaimed = "#9999FF";
-
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
 
@@ -38,9 +33,6 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //********************* 
     coordinate = [0,0];
     team = "blue";
-
-    playerColor = playerColors[team];
-    claimColor = claimedColors[team];
 
     // TODO IP Handling, most likely not necessary
 
@@ -129,7 +121,7 @@ function tableUpdate (coordinate, team) {
  // Creation of Player 
 
 function createPlayer() {
-    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColor;
+    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColors[team];
     table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
 }
 
@@ -139,7 +131,7 @@ function movement(x,y) {
         setTimeout(function() {
             try {
                 if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].className.includes(team)) {
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimedColors[team];
                     document.getElementsByClassName('player')[0].className = "";
                     spectatorMode();
                 }
@@ -147,8 +139,8 @@ function movement(x,y) {
                     table.rows[coordinate[0]].cells[coordinate[1]].className = table.rows[coordinate[0]].cells[coordinate[1]].className.replace("player ", "");
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player ";
                     table.rows[coordinate[0] + y].cells[coordinate[1] + x].className += team;
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].style.backgroundColor = playerColor;
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
+                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].style.backgroundColor = playerColors[team];
+                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimedColors[team];
                     coordinate = [coordinate[0] + y, coordinate[1] + x];
                     updateScore();
                     serverTransfer(coordinate,team,turn,username);
