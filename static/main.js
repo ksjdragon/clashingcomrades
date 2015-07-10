@@ -8,6 +8,7 @@ var username;
 var playerColor;
 var claimColor;
 var turn = 0;
+var spectatedUser;
 // Colors
 var playerColors = {
     "red": "#E62E2E",
@@ -27,7 +28,8 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     _uuid4 = function(cc) {
         var rr = Math.random() * 16 | 0; return (cc === 'x' ? rr : (rr & 0x3 | 0x8)).toString(16);
     };
-    username = uuid4()
+    username = uuid4();
+    spectatedUser = username;
     //*********************
     // TODO Get from server
     //********************* 
@@ -55,8 +57,6 @@ function serverTransfer(coordinate,team,turn,username) {
         turn: turn,
         username: username
     };
-    // For debugging
-    console.log(move);
     // Sending Data
     $.ajax('http://127.0.0.1:5000/game', {
         method: 'POST',
@@ -69,12 +69,23 @@ function serverTransfer(coordinate,team,turn,username) {
     .then(
         function success(data) {
             for (var user in data) {
-                if (data.hasOwnProperty(user) && (user != username) && (data[user][team] != "spectator") && (data[user].length > turn)) {
-                    console.log(data[user]);
+                if (data.hasOwnProperty(user)
+                    && (user != username)
+                    && (data[user].length > turn)
+                    && (data[user][turn][2] != "spectator")
+                    ) {
+                    if ((data[user].length > data[spectatedUser].length)
+                        && data[spectatedUser][turn][2] === "spectator") {
+                        console.log(data[user]);
+                        console.log(data[spectatedUser]);
+                        spectatedUser = user;
+                    }
                     var theMove = data[user][turn];
                     updateTable(theMove[1], theMove[2]);
-                    var oldMove = data[user][turn - 1];
-                    updateOldTable(oldMove[1], oldMove[2]);
+                    if (theMove[2] != "spectator") {
+                        var oldMove = data[user][turn - 1];
+                        updateOldTable(oldMove[1], oldMove[2]);
+                    }
                 }
             }
         },
@@ -185,9 +196,9 @@ function movement(x,y) {
                     playerCoordinate = [playerCoordinate[0] + y, playerCoordinate[1] + x];
                     updateScore();
                     serverTransfer(playerCoordinate,playerTeam,turn,username);
-                    autoScroll();
                 }
                 turn = turn + 1;
+                autoScroll();
                 movement(x,y);
             }
             catch(err) {
@@ -244,5 +255,10 @@ function autoScroll() {
     window.innerHeight / -2,
     window.innerWidth / -2
     ];
-    $('body').scrollTo(document.getElementById(username), 100, {offset: {top: center[0] , left: center[1]} });
+    console.log(spectatedUser);
+    if (playerTeam == "spectator") {
+        $('body').scrollTo(document.getElementById(spectatedUser), 100, {offset: {top: center[0] , left: center[1]} });
+    } else {
+        $('body').scrollTo(document.getElementById(username), 100, {offset: {top: center[0] , left: center[1]} });
+    }
 }    
