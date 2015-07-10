@@ -65,11 +65,11 @@ function serverTransfer(coordinate,team,turn,username) {
         dataType: "json",
         contentType: 'application/json;charset=UTF-8'
     })
-    // Receiving Data
+    // Server Response
     .then(
         function success(data) {
             for (var user in data) {
-                } if (data.hasOwnProperty(user) && (user != username)) {
+                if (data.hasOwnProperty(user) && (user != username)) {
                     console.log(data[user][turn]);
                     var theMove = data[user][turn];
                     updateTable(theMove[1], theMove[2]);
@@ -163,7 +163,7 @@ function movement(x,y) {
     timer =
         setTimeout(function() {
             try {
-                if(nextSquare.className.includes(playerTeam) || nextSquare.className.includes('player')) {
+                if (nextSquare.className.includes(playerTeam) || nextSquare.className.includes('player')) {
                     killPlayer(playerCoordinate, playerTeam);
                 }
                 else {
@@ -195,22 +195,19 @@ function movePlayer(e) {
 
     e = e || window.event;
 
-    if(e.keyCode === 38 && type != "up") {
+    if (e.keyCode === 38 && type != "up") {
         type = "up";
         clearTimeout(timer);
         movement(0,-1);
-    } else 
-    if(e.keyCode === 40 && type != "down") {
+    } else if (e.keyCode === 40 && type != "down") {
         type = "down";
         clearTimeout(timer);
         movement(0,1);
-    } else 
-    if(e.keyCode === 37 && type != "left") {
+    } else if (e.keyCode === 37 && type != "left") {
         type = "left"
         clearTimeout(timer);
         movement(-1,0);
-    } else 
-    if(e.keyCode === 39 && type != "right") {
+    } else if (e.keyCode === 39 && type != "right") {
         type = "right"
         clearTimeout(timer);
         movement(1,0);
