@@ -172,8 +172,13 @@ function updateScore() {
 
 function movement(x,y) {
     if (playerTeam != "spectator") {
-        previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
-        nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
+        try {
+            previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
+            nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
+        } catch(err) {
+            //Hitting top/down
+            killPlayer(playerCoordinate, playerTeam);
+        }
     }
 
     timer =
@@ -204,7 +209,7 @@ function movement(x,y) {
                 movement(x,y);
             }
             catch(err) {
-                // On hit wall
+                // Hitting left/right
                 killPlayer(playerCoordinate, playerTeam);
             }
         }, 100);
