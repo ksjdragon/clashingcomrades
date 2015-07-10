@@ -1,14 +1,14 @@
-//Global Variables 
-var coordinate;
+// Global Variables 
+var playerCoordinate;
 var username;
-var team;
+var playerTeam;
 var timer;
 var type;
 var username;
 var playerColor;
 var claimColor;
 var turn = 0;
-//Colors
+// Colors
 var playerColors = {
     "red": "#E62E2E",
     "blue": "#4343D8"
@@ -31,18 +31,20 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //*********************
     // TODO Get from server
     //********************* 
-    coordinate = [0,0];
-    team = "blue";
+    playerCoordinate = [0,0];
+    playerTeam = "blue";
 
     // TODO IP Handling, most likely not necessary
 
     var login = document.getElementById("login");
     login.parentNode.removeChild(login);
-
-    scoreboardCreate();
+    // Create scoreboard before table to prevent css glitching
+    createScoreboard();
+    createTable();
+    // Update score before creating player so scoreboard starts at 0
     updateScore();
-    tableCreate();
     createPlayer();
+   
     document.onkeydown = movePlayer;
 }
 
@@ -55,6 +57,7 @@ function serverTransfer(coordinate,team,turn,username) {
     };
     // For debugging
     console.log(move);
+    // Sending Data
     $.ajax('http://127.0.0.1:5000/game', {
         method: 'POST',
         type : "POST",
@@ -62,15 +65,16 @@ function serverTransfer(coordinate,team,turn,username) {
         dataType: "json",
         contentType: 'application/json;charset=UTF-8'
     })
+    // Receiving Data
     .then(
         function success(data) {
             for (var user in data) {
-                if (data.hasOwnProperty(user) && (user != username)) {
+                } if (data.hasOwnProperty(user) && (user != username)) {
                     console.log(data[user][turn]);
                     var theMove = data[user][turn];
-                    tableUpdate(theMove[1], theMove[2]);
+                    updateTable(theMove[1], theMove[2]);
                     var oldMove = data[user][turn - 1];
-                    oldTableUpdate(oldMove[1], oldMove[2]);
+                    updateOldTable(oldMove[1], oldMove[2]);
                 }
             }
         },
@@ -81,9 +85,27 @@ function serverTransfer(coordinate,team,turn,username) {
     );
 }
 
+// CREATION
+
+// Creation of Table 
+
+function createTable() {
+    var body = document.body
+    var tbl  = document.createElement('table');
+    tbl.style.border = "1px solid black";
+    for(var i = 0; i < 20; i++) {
+        var tr = tbl.insertRow();
+        for(var j = 0; j < 30; j++) {
+            var td = tr.insertCell();
+        }
+    }
+    body.appendChild(tbl);
+    table = document.getElementsByTagName('table')[0];
+}
+
 // Creation of Scoreboard
 
-function scoreboardCreate() {
+function createScoreboard() {
     var scoreboard = document.getElementsByTagName('body')[0].appendChild(document.createElement("DIV"));
     scoreboard.className = 'scoreboard';
     var redScore = scoreboard.appendChild(document.createElement("SPAN"));
@@ -101,69 +123,70 @@ function scoreboardCreate() {
     blueNumber.appendChild(document.createTextNode(""));
 }
 
-// Creation of Table 
-
-function tableCreate() {
-    var body = document.body
-    var tbl  = document.createElement('table');
-    tbl.style.border = "1px solid black";
-
-    for(var i = 0; i < 20; i++) {
-        var tr = tbl.insertRow();
-        for(var j = 0; j < 30; j++) {
-            var td = tr.insertCell();
-        }
-    }
-    body.appendChild(tbl);
-    table = document.getElementsByTagName('table')[0];
-}
-
-function tableUpdate (coordinate, team) {
-    table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
-    table.rows[coordinate[0]].cells[coordinate[1]].className += team;
-    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColors[team];
-}
-
-function oldTableUpdate(coordinate, team) {
-    table.rows[coordinate[0]].cells[coordinate[1]].className = table.rows[coordinate[0]].cells[coordinate[1]].className.replace("player ", "");
-    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimedColors[team];
-}
-
- // Creation of Player 
+// Creation of Player 
 
 function createPlayer() {
-    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = playerColors[team];
-    table.rows[coordinate[0]].cells[coordinate[1]].className = "player ";
+    startSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
+    startSquare.style.backgroundColor = playerColors[playerTeam];
+    startSquare.className = "player " + playerTeam;
+    startSquare.id = username;
 }
 
+// UPDATING
+
+function updateTable(coordinate, team) {
+    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
+    otherPlayer.style.backgroundColor = playerColors[team];
+    otherPlayer.className = "player " + team;  
+}
+
+function updateOldTable(coordinate, team) {
+    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
+    otherPlayer.style.backgroundColor = claimedColors[team];
+    otherPlayer.className = otherPlayer.className.replace("player ", "");
+}
+
+function updateScore() {
+    var score = [
+        document.getElementsByClassName('red').length,
+        document.getElementsByClassName('blue').length
+    ];
+    document.getElementById('rednumber').childNodes[0].nodeValue = " : " + score[0];
+    document.getElementById('bluenumber').childNodes[0].nodeValue = " : " + score[1];
+}
+
+ // PLAYER HANDLING 
+
 function movement(x,y) {
+    previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
+    nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
     timer =
         setTimeout(function() {
             try {
-                if (table.rows[coordinate[0] + y].cells[coordinate[1] + x].className.includes(team)) {
-                    // Kills Player
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimedColors[team];
-                    document.getElementsByClassName('player')[0].className = "";
-                    spectatorMode();
+                if(nextSquare.className.includes(playerTeam) || nextSquare.className.includes('player')) {
+                    killPlayer(playerCoordinate, playerTeam);
                 }
                 else {
-                    table.rows[coordinate[0]].cells[coordinate[1]].className = table.rows[coordinate[0]].cells[coordinate[1]].className.replace("player ", "");
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].className = "player ";
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].className += team;
-                    table.rows[coordinate[0] + y].cells[coordinate[1] + x].style.backgroundColor = playerColors[team];
-                    table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimedColors[team];
-                    coordinate = [coordinate[0] + y, coordinate[1] + x];
+                    // Changing new square
+                    nextSquare.style.backgroundColor = playerColors[playerTeam];
+                    nextSquare.className = "player " + playerTeam;
+                    nextSquare.id = username;
+                    // Resetting old square
+                    previousSquare.style.backgroundColor = claimedColors[playerTeam];
+                    previousSquare.className = previousSquare.className.replace("player ", "");
+                    previousSquare.id = "";
+                    // Recursive actions
+                    playerCoordinate = [playerCoordinate[0] + y, playerCoordinate[1] + x];
                     updateScore();
-                    serverTransfer(coordinate,team,turn,username);
+                    serverTransfer(playerCoordinate,playerTeam,turn,username);
+                    autoScroll();
                     turn = turn + 1;
                     movement(x,y);
                 }
             }
             catch(err) {
-                //Kills Player
-                table.rows[coordinate[0]].cells[coordinate[1]].style.backgroundColor = claimColor;
-                document.getElementsByClassName('player')[0].className = "";
-                spectatorMode();
+                // On hit wall
+                killPlayer(playerCoordinate, playerTeam);
             }
         }, 100);
 }
@@ -176,35 +199,45 @@ function movePlayer(e) {
         type = "up";
         clearTimeout(timer);
         movement(0,-1);
-    } else if(e.keyCode === 40 && type != "down") {
+    } else 
+    if(e.keyCode === 40 && type != "down") {
         type = "down";
         clearTimeout(timer);
         movement(0,1);
-    }
-    else if(e.keyCode === 37 && type != "left") {
+    } else 
+    if(e.keyCode === 37 && type != "left") {
         type = "left"
         clearTimeout(timer);
         movement(-1,0);
-    }
-    else if(e.keyCode === 39 && type != "right") {
+    } else 
+    if(e.keyCode === 39 && type != "right") {
         type = "right"
         clearTimeout(timer);
         movement(1,0);
     }
 }
-
+function killPlayer(coordinate, team) {
+    deathSquare = table.rows[coordinate[0]].cells[coordinate[1]];
+    deathSquare.style.backgroundColor = claimedColors[team]; 
+    deathSquare.className = deathSquare.className.replace("player ", "");
+    deathSquare.id = "";
+    // Spectator mode first to set team to spectator
+    spectatorMode();
+    serverTransfer(coordinate,team,turn,username);   
+}
 function spectatorMode() {
     //***************************
     // TODO Finish Spectator Mode
     //***************************
-    coordinate = null;
+    playerCoordinate = null;
+    playerTeam = 'spectator';
+
 }
 
-function updateScore() {
-    var score = [
-        document.getElementsByClassName('red').length,
-        document.getElementsByClassName('blue').length
+function autoScroll() {
+    center = [
+    window.innerHeight / -2,
+    window.innerWidth / -2
     ];
-    document.getElementById('rednumber').childNodes[0].nodeValue = " : " + score[0];
-    document.getElementById('bluenumber').childNodes[0].nodeValue = " : " + score[1];
-}
+    $('body').scrollTo(document.getElementById(username), 100, {offset: {top: center[0] , left: center[1]} });
+}    
