@@ -69,8 +69,8 @@ function serverTransfer(coordinate,team,turn,username) {
     .then(
         function success(data) {
             for (var user in data) {
-                if (data.hasOwnProperty(user) && (user != username)) {
-                    console.log(data[user][turn]);
+                if (data.hasOwnProperty(user) && (user != username) && (data[user][team] != "spectator") && (data[user].length > turn)) {
+                    console.log(data[user]);
                     var theMove = data[user][turn];
                     updateTable(theMove[1], theMove[2]);
                     var oldMove = data[user][turn - 1];
@@ -158,12 +158,18 @@ function updateScore() {
  // PLAYER HANDLING 
 
 function movement(x,y) {
-    previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
-    nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
+    if (playerTeam != "spectator") {
+        previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
+        nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
+    }
+
     timer =
         setTimeout(function() {
             try {
-                if (nextSquare.className.includes(playerTeam) || nextSquare.className.includes('player')) {
+                if (nextSquare == undefined
+                    || nextSquare.className.includes('player') 
+                    || playerTeam === "spectator"
+                    || nextSquare.className.includes(playerTeam)) {
                     killPlayer(playerCoordinate, playerTeam);
                 }
                 else {
@@ -180,9 +186,9 @@ function movement(x,y) {
                     updateScore();
                     serverTransfer(playerCoordinate,playerTeam,turn,username);
                     autoScroll();
-                    turn = turn + 1;
-                    movement(x,y);
                 }
+                turn = turn + 1;
+                movement(x,y);
             }
             catch(err) {
                 // On hit wall
@@ -214,10 +220,12 @@ function movePlayer(e) {
     }
 }
 function killPlayer(coordinate, team) {
-    deathSquare = table.rows[coordinate[0]].cells[coordinate[1]];
-    deathSquare.style.backgroundColor = claimedColors[team]; 
-    deathSquare.className = deathSquare.className.replace("player ", "");
-    deathSquare.id = "";
+    if (playerTeam != "spectator") {
+        deathSquare = table.rows[coordinate[0]].cells[coordinate[1]];
+        deathSquare.style.backgroundColor = claimedColors[team]; 
+        deathSquare.className = deathSquare.className.replace("player ", "");
+        deathSquare.id = "";
+    }
     // Spectator mode first to set team to spectator
     spectatorMode();
     serverTransfer(coordinate,team,turn,username);   
