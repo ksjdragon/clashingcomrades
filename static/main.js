@@ -33,7 +33,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //*********************
     // TODO Get from server
     //********************* 
-    playerCoordinate = [0,0];
+    playerCoordinate = [19,0];
     playerTeam = "blue";
 
     // TODO IP Handling, most likely not necessary
@@ -46,7 +46,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     // Update score before creating player so scoreboard starts at 0
     updateScore();
     createPlayer();
-   
+    autoScroll('start');
     document.onkeydown = movePlayer;
 }
 
@@ -251,14 +251,14 @@ function spectatorMode() {
     playerTeam = 'spectator';
 
 }
-
-function autoScroll() {
+function autoScroll(type) {
     center = [
     window.innerHeight / -2,
     window.innerWidth / -2
     ];
-    console.log(spectatedUser);
-    if (playerTeam == "spectator") {
+    if(type === 'start') {
+        $('body').scrollTo(document.getElementById(username), 0, {offset: {top: center[0] , left: center[1]} });
+    } else if (playerTeam == "spectator") {
         $('body').scrollTo(document.getElementById(spectatedUser), 100, {offset: {top: center[0] , left: center[1]} });
     } else {
         $('body').scrollTo(document.getElementById(username), 100, {offset: {top: center[0] , left: center[1]} });
