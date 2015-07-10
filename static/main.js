@@ -81,7 +81,7 @@ function serverTransfer(coordinate,team,turn,username) {
                         spectatedUser = user;
                     }
                     var theMove = data[user][turn];
-                    updateTable(theMove[1], theMove[2]);
+                    updateTable(user, theMove[1], theMove[2]);
                     if (theMove[2] != "spectator") {
                         var oldMove = data[user][turn - 1];
                         updateOldTable(oldMove[1], oldMove[2]);
@@ -145,16 +145,18 @@ function createPlayer() {
 
 // UPDATING
 
-function updateTable(coordinate, team) {
+function updateTable(username, coordinate, team) {
     otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
     otherPlayer.style.backgroundColor = playerColors[team];
-    otherPlayer.className = "player " + team;  
+    otherPlayer.className = "player " + team; 
+    otherPlayer.id = username;
 }
 
 function updateOldTable(coordinate, team) {
     otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
     otherPlayer.style.backgroundColor = claimedColors[team];
     otherPlayer.className = otherPlayer.className.replace("player ", "");
+    otherPlayer.id = ""
 }
 
 function updateScore() {
