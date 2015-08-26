@@ -33,7 +33,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //*********************
     // TODO Get from server
     //********************* 
-    playerCoordinate = [19,0];
+    playerCoordinate = [0,0];
     playerTeam = "blue";
 
     // TODO IP Handling, most likely not necessary
@@ -106,7 +106,7 @@ function createTable() {
     tbl.style.border = "1px solid black";
     for(var i = 0; i < 20; i++) {
         var tr = tbl.insertRow();
-        for(var j = 0; j < 30; j++) {
+        for(var j = 0; j < 20; j++) {
             var td = tr.insertCell();
         }
     }
@@ -205,7 +205,7 @@ function movement(x,y) {
                     serverTransfer(playerCoordinate,playerTeam,turn,username);
                 }
                 turn = turn + 1;
-                autoScroll();
+                autoScroll('spectator');
                 movement(x,y);
             }
             catch(err) {
@@ -261,11 +261,12 @@ function autoScroll(type) {
     window.innerHeight / -2,
     window.innerWidth / -2
     ];
-    if(type === 'start') {
+    if(type == 'start') {
         $('body').scrollTo(document.getElementById(username), 0, {offset: {top: center[0] , left: center[1]} });
-    } else if (playerTeam == "spectator") {
+    } else if (type == "spectator") {
         $('body').scrollTo(document.getElementById(spectatedUser), 100, {offset: {top: center[0] , left: center[1]} });
     } else {
-        $('body').scrollTo(document.getElementById(username), 100, {offset: {top: center[0] , left: center[1]} });
+        alert("Broken?")
+        // $('body').scrollTo(document.getElementById(username), 100, {offset: {top: center[0] , left: center[1]} });
     }
 }    

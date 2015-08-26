@@ -4,7 +4,8 @@ app = Flask(__name__)
 
 # Since only one game for now, this is the object that will hold the data for the game
 game = {}
-
+color = 0
+coloumn = 0
 
 # Renders client
 @app.route("/")
@@ -19,19 +20,29 @@ def update_game():
     # Eventually will be used for initial team and coordinate
     # Not currently being used anywhere
     if request.method == 'GET':
-        return jsonify(game)
+        global color
+        global coloumn
+        color = color + 1
+        team = ["red", "blue"][color % 2]
+        row = 10 + color % 2
+        coloumn = coloumn + 1
+        answer = {
+            "team": team,
+            "coordinate": [row, coloumn]
+        }
+
+        return jsonify(answer)
 
     # What to do when the Client tells the server something
     if request.method == 'POST':
-        print "asdabsb"
         # Define the data given by client
         playerStatus = request.get_json(force=True)
         # If the username that the player sent is already defined in game
         if playerStatus["username"] in game:
             game[playerStatus["username"]].append([playerStatus["turn"], playerStatus["coordinate"], playerStatus["team"]])
         else:
-            print "yesolkgahjewoiagj"
             game[playerStatus["username"]] = [[playerStatus["turn"], playerStatus["coordinate"], playerStatus["team"]]]
+
         # Return the game with the information you added, in addition to everyone else
         return jsonify(game)
 
