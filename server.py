@@ -5,7 +5,7 @@ app = Flask(__name__)
 # Since only one game for now, this is the object that will hold the data for the game
 game = {}
 color = 0
-coloumn = 0
+vertical = 0
 
 # Renders client
 @app.route("/")
@@ -21,14 +21,14 @@ def update_game():
     # Not currently being used anywhere
     if request.method == 'GET':
         global color
-        global coloumn
+        global vertical
         color = color + 1
         team = ["red", "blue"][color % 2]
-        row = 10 + color % 2
-        coloumn = coloumn + 1
+        horizontal = 10 + color % 2
+        vertical = vertical + 1
         answer = {
             "team": team,
-            "coordinate": [row, coloumn]
+            "coordinate": [vertical, horizontal]
         }
 
         return jsonify(answer)
