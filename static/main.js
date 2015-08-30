@@ -33,8 +33,10 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //*********************
     // TODO Get from server
     //********************* 
-    playerCoordinate = [0,0];
-    playerTeam = "blue";
+    getInitial()
+    
+
+
 
     // TODO IP Handling, most likely not necessary
 
@@ -50,6 +52,26 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     document.onkeydown = movePlayer;
 }
 
+function setInitial(initial) {
+	playerCoordinate = initial["coordinate"];
+    playerTeam = initial["team"];
+}
+
+function getInitial() {
+	$.ajax({
+	  url: 'http://127.0.0.1:5000/game',
+	  type: 'GET',
+	  // data: '',
+	  success: function(data) {
+		//called when successful
+		setInitial(data)
+	  },
+	  error: function(e) {
+		//called when there is an error
+		//console.log(e.message);
+	  }
+	});
+}
 function serverTransfer(coordinate,team,turn,username) {
     var move = {
         coordinate: coordinate,
