@@ -33,11 +33,11 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     //*********************
     // TODO Get from server
     //********************* 
+    setTimeout
     getInitial()
+    console.log(playerTeam);
+    console.log(playerCoordinate[0],playerCoordinate[1]);
     
-
-
-
     // TODO IP Handling, most likely not necessary
 
     var login = document.getElementById("login");
@@ -52,19 +52,17 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     document.onkeydown = movePlayer;
 }
 
-function setInitial(initial) {
-	playerCoordinate = initial["coordinate"];
-    playerTeam = initial["team"];
-}
-
 function getInitial() {
 	$.ajax({
 	  url: 'http://127.0.0.1:5000/game',
 	  type: 'GET',
+      async: false,
 	  // data: '',
 	  success: function(data) {
 		//called when successful
-		setInitial(data)
+        console.log(data["coordinate"], data["team"])
+		playerCoordinate = data["coordinate"];
+        playerTeam = data["team"];
 	  },
 	  error: function(e) {
 		//called when there is an error
@@ -72,6 +70,7 @@ function getInitial() {
 	  }
 	});
 }
+
 function serverTransfer(coordinate,team,turn,username) {
     var move = {
         coordinate: coordinate,
@@ -84,6 +83,7 @@ function serverTransfer(coordinate,team,turn,username) {
         method: 'POST',
         type : "POST",
         data: JSON.stringify(move, null, '\t'),
+        async: false,
         dataType: "json",
         contentType: 'application/json;charset=UTF-8'
     })
