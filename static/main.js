@@ -20,7 +20,6 @@ var claimedColors = {
 }
 
 document.getElementsByClassName('play')[0].onclick = function startGame() {
-
     uuid4 = function() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, _uuid4);
     };
@@ -28,15 +27,13 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     _uuid4 = function(cc) {
         var rr = Math.random() * 16 | 0; return (cc === 'x' ? rr : (rr & 0x3 | 0x8)).toString(16);
     };
+
     username = uuid4();
     spectatedUser = username;
     //*********************
     // TODO Get from server
     //********************* 
-    setTimeout
     getInitial()
-    console.log(playerTeam);
-    console.log(playerCoordinate[0],playerCoordinate[1]);
     
     // TODO IP Handling, most likely not necessary
 
@@ -60,13 +57,12 @@ function getInitial() {
 	  // data: '',
 	  success: function(data) {
 		//called when successful
-        console.log(data["coordinate"], data["team"])
 		playerCoordinate = data["coordinate"];
         playerTeam = data["team"];
 	  },
 	  error: function(e) {
 		//called when there is an error
-		//console.log(e.message);
+		//1(e.message);
 	  }
 	});
 }
@@ -98,8 +94,6 @@ function serverTransfer(coordinate,team,turn,username) {
                     ) {
                     if ((data[user].length > data[spectatedUser].length)
                         && data[spectatedUser][turn][2] === "spectator") {
-                        console.log(data[user]);
-                        console.log(data[spectatedUser]);
                         spectatedUser = user;
                     }
                     var theMove = data[user][turn];
