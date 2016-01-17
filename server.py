@@ -1,11 +1,15 @@
 from flask import Flask
 from flask import render_template, jsonify, request
+from time import sleep 
 app = Flask(__name__)
 
 # Since only one game for now, this is the object that will hold the data for the game
 game = {}
 color = 0
 vertical = 0
+playersInGame = []
+maxPlayers = 10
+timeLeft = 10 + 1
 
 # Renders client
 @app.route("/")
@@ -46,6 +50,34 @@ def update_game():
         # Return the game with the information you added, in addition to everyone else
         return jsonify(game)
 
+@app.route('/pregame', methods=['GET','POST','EXIT','COUNT'])
+def update_players():
+
+    if method.request == 'GET':
+        return jsonify(len(playersInGame))
+    if method.request == 'POST':
+        #Define the data given by client.
+        uuid4 = request.get_json(force=True)
+        # If this client has not already registered with the server, register.
+        if uuid4 not in playersInGame:
+            playersInGame.append(uuid4)
+        
+    if method.request == 'EXIT':
+        #Define the data given by client.
+        uuid4 = request.get_json(force=True)
+        playersInGame.remove(uuid4)
+
+    if method.request == 'COUNT':
+        countdown()
+        return timeLeft
+
+def countdown():
+    timeLeft = timeLeft - 1      
+    time.sleep(1)
+    if len(playersInGame) != maxPlayers:
+        timeLeft = 11
+    else:
+        countdown()
 
 # Eventual more than one game can be played on website
 

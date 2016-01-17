@@ -12,8 +12,8 @@ html {
 }
 
 body {
-	overflow: hidden;
-}	
+    overflow: hidden;
+}   
 td {
     min-width: 100px;
     height: 100px;
@@ -42,17 +42,28 @@ td {
     margin-left:5%;
 }
 
-.scoreboard {
+.scoreboard, .spectator {
     font-family: Lato;
-    font-size: 20px;
     color: #ffffff;
     position: fixed;
-    padding: 5px 10px 5px 10px;
-    margin-left: 45%;
-    margin-right: 45%;
     z-index: 1;
     background-color: #000;
     opacity: 0.7;
+}
+
+.scoreboard {
+    padding: 5px 10px 5px 10px;
+    font-size: 20px;
+    margin-left: 45%;
+    margin-right: 45%;
+}
+
+.spectator {
+    padding: 10px 15px 10px 15px;
+    font-size: 50px;
+    margin-left: 86%;
+    margin-right: 1%;
+    margin-top: 45%;
 }
 
 #redscore {

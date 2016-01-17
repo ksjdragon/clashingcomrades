@@ -8,9 +8,12 @@ var username;
 var playerColor;
 var claimColor;
 var turn = 0;
+var spectatorChoose = 1;
 var spectatedUser;
+var numberOfPlayers;
+var canMove = false;
 // Colors
-var playerColors = {
+var playerColors = {s
     "red": "#E62E2E",
     "blue": "#4343D8"
 };
@@ -30,10 +33,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
 
     username = uuid4();
     spectatedUser = username;
-    //*********************
-    // TODO Get from server
-    //********************* 
-    getInitial()
+    getInitial();
     
     // TODO IP Handling, most likely not necessary
 
@@ -44,14 +44,13 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     createTable();
     // Update score before creating player so scoreboard starts at 0
     updateScore();
-    createPlayer();
-    autoScroll('start');
+  	waitForPlayers();
     document.onkeydown = movePlayer;
 }
 
 function getInitial() {
 	$.ajax({
-	  url: 'http://127.0.0.1:5000/game',
+	  url: 'http://127.0.0.1:5000/pregame',
 	  type: 'GET',
       async: false,
 	  // data: '',
@@ -112,6 +111,69 @@ function serverTransfer(coordinate,team,turn,username) {
     );
 }
 
+function waitForPlayers(uuid4) {
+	timer = setTimeout(function() {
+		// Sending "I'm here."
+		$.ajax({
+			url: 'http://127.0.0.1:5000/pregame',
+			type: 'GET',
+		    async: false,
+		    // data: '',
+		    success: function(data) {
+				//called when successful
+				numberOfPlayers = data
+				if (numberOfPlayers == '10') {
+					countdown();
+					// try catch delete table for visuals later.
+
+				}
+	  		},
+	  		error: function(e) {
+				//called when there is an error
+				//(e.message);
+	  		}
+		})
+		.then(
+			function sendhere() {
+				$.ajax('http://127.0.0.1:5000/pregame', {
+			        method: 'POST',
+			        type : "POST",
+			        data: JSON.stringify(uuid4, null, '\t'),
+			        async: false,
+			        dataType: "json",
+			        contentType: 'application/json;charset=UTF-8'
+    			})
+    			.then(
+    				waitForPlayers();
+				);	
+			}
+		);
+		
+	}, 3000)
+}
+
+function countdown() {
+	$.ajax({
+		url: 'http://127.0.0.1:5000/pregame',
+		type: 'COUNT',
+		async: false,
+		success: function(data) {
+			//called when successful
+			timeLeft = data;
+			//MAKE VISUAL STUFF HERE
+			countdown()
+			if(timeLeft == 0) {
+				createPlayer();
+    			autoScroll('start');
+			}
+
+	  	},
+  		error: function(e) {
+			//called when there is an error
+			//(e.message);
+  		}	
+	})
+}
 // CREATION
 
 // Creation of Table 
@@ -233,25 +295,27 @@ function movement(x,y) {
 
 function movePlayer(e) {
 
-    e = e || window.event;
+	if (canMove) {
+	    e = e || window.event;
 
-    if (e.keyCode === 38 && type != "up") {
-        type = "up";
-        clearTimeout(timer);
-        movement(0,-1);
-    } else if (e.keyCode === 40 && type != "down") {
-        type = "down";
-        clearTimeout(timer);
-        movement(0,1);
-    } else if (e.keyCode === 37 && type != "left") {
-        type = "left"
-        clearTimeout(timer);
-        movement(-1,0);
-    } else if (e.keyCode === 39 && type != "right") {
-        type = "right"
-        clearTimeout(timer);
-        movement(1,0);
-    }
+	    if (e.keyCode === 38 && type != "up") {
+	        type = "up";
+	        clearTimeout(timer);
+	        movement(0,-1);
+	    } else if (e.keyCode === 40 && type != "down") {
+	        type = "down";
+	        clearTimeout(timer);
+	        movement(0,1);
+	    } else if (e.keyCode === 37 && type != "left") {
+	        type = "left"
+	        clearTimeout(timer);
+	        movement(-1,0);
+	    } else if (e.keyCode === 39 && type != "right") {
+	        type = "right"
+	        clearTimeout(timer);
+	        movement(1,0);
+	    }
+	}
 }
 function killPlayer(coordinate, team) {
     if (playerTeam != "spectator") {
@@ -264,13 +328,33 @@ function killPlayer(coordinate, team) {
     spectatorMode();
     serverTransfer(coordinate,team,turn,username);   
 }
+
 function spectatorMode() {
-    //***************************
-    // TODO Finish Spectator Mode
-    //***************************
     playerCoordinate = null;
     playerTeam = 'spectator';
+    document.getElementsByClassName('spectator')[0].style.opacity = 0.7;
+    spectatorType = 'spectatorFull';
+    spectatorFull();
+    document.getElementsByClassName('spectator')[0].onclick = function changeText() {
+        spectatorChoose = spectatorChoose * (-1);
+        if(spectatorChoose == -1) {
+            document.getElementsByClassName('spectator')[0].childNodes[0].childNodes[0].nodeValue = "Following";
+            spectatorType = 'spectatorFollow';
+            document.getElementsByTagName('body')[0].style.overflow = "hidden";
+        } else {
+            document.getElementsByClassName('spectator')[0].childNodes[0].childNodes[0].nodeValue = "Full View";
+            spectatorType = 'spectatorFull';
+            spectatorFull();
+        }
+    }
+}
 
+function spectatorFull() {
+    for(var i = 0; i < document.getElementsByTagName('td').length;i++) {
+            document.getElementsByTagName('body')[0].style.overflow = "auto";
+            document.getElementsByTagName('td')[i].style.minWidth = "75px";
+            document.getElementsByTagName('td')[i].style.height = "75px";
+        }
 }
 function autoScroll(type) {
     center = [
