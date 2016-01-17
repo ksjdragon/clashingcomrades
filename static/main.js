@@ -44,7 +44,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     createTable();
     // Update score before creating player so scoreboard starts at 0
     updateScore();
-  	waitForPlayers();
+  	waitForPlayers(username);
     
 }
 
@@ -112,33 +112,39 @@ function serverTransfer(coordinate,team,turn,username) {
 }
 
 function waitForPlayers(uuid4) {
-	timer = setTimeout(function() {
-		// Sending "I'm here."
-		$.ajax('http://127.0.0.1:5000/pregame', {
-	        method: 'POST',
-	        type : "POST",
-	        data: JSON.stringify(uuid4, null, '\t'),
-	        async: false,
-	        dataType: "json",
-	        contentType: 'application/json;charset=UTF-8'
+    repeat = true;
+    while (repeat == true) {
+    	timer = setTimeout(function() {
+    		// Sending "I'm here."
+    		$.ajax('http://127.0.0.1:5000/pregame', {
+    	        method: 'POST',
+    	        type : "POST",
+    	        data: JSON.stringify(uuid4, null, '\t'),
+    	        async: false,
+    	        dataType: "json",
+    	        contentType: 'application/json;charset=UTF-8',
 
-		    success: function(data) {
-				numberOfPlayers = data;
-				if (numberOfPlayers == '10') {
-					countdown();
-					// try catch delete table for visuals later.
-				}
-	  		},
-	  		error: function(e) {
-				//called when there is an error
-				//(e.message);
-	  		}
-		})
-		.then(
-			// Repeat this function until 10 players are here.
-    		waitForPlayers();
-			);		
-	}, 3000);
+    		    success: function(data) {
+    				numberOfPlayers = data["playersInGame"];
+    				if (numberOfPlayers == 1) {
+    					countdown();
+                        repeat = false
+    					// try catch delete table for visuals later.
+    				}
+    	  		},
+    	  		error: function(e) {
+    				//called when there is an error
+    				//(e.message);
+    	  		}
+    		})
+    		.then(
+    			// Repeat this function until 10 players are here.
+        		function success (data) {
+                    repeat = true
+                }
+    		);		
+	   }, 3000);
+    }
 }
 
 function countdown() {
@@ -148,7 +154,7 @@ function countdown() {
 			type: 'GET',
 			async: false,
 			success: function(data) {
-				timeLeft = data;
+				timeLeft = data["timeLeft"];
 				//MAKE VISUAL STUFF HERE
 				if(timeLeft == 0) {
 					createPlayer();

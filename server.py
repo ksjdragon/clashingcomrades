@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import render_template, jsonify, request
-from time import sleep 
+import time
 app = Flask(__name__)
 
 # Since only one game for now, this is the object that will hold the data for the game
@@ -8,7 +8,8 @@ game = {}
 color = 0
 vertical = 0
 playersInGame = []
-maxPlayers = 10
+# Testing 1 Player for now
+maxPlayers = 1
 timeLeft = 11
 
 # Renders client
@@ -50,28 +51,32 @@ def update_game():
         # Return the game with the information you added, in addition to everyone else
         return jsonify(game)
 
-@app.route('/pregame', methods=['GET','POST','COUNT'])
+@app.route('/pregame', methods=['GET','POST','EXIT'])
 def update_players():
     
-    if method.request == 'GET':
+    if request.method == 'GET':
         countdown()
-        return timeLeft
+        toReturn = {}
+        toReturn["timeLeft"] = timeLeft
+        return jsonify(toReturn)
 
-    if method.request == 'POST':
+    if request.method == 'POST':
         #Define the data given by client.
         uuid4 = request.get_json(force=True)
         # If this client has not already registered with the server, register.
-        if uuid4 not in playersInGame:
+        if not uuid4 in playersInGame:
             playersInGame.append(uuid4)
-
-        return jsonify(len(playersInGame))
+        toReturn = {}
+        toReturn["playersInGame"] = len(playersInGame)
+        return jsonify(toReturn)
         
-    if method.request == 'EXIT':
+    if request.method == 'EXIT':
         #Define the data given by client.
         uuid4 = request.get_json(force=True)
         playersInGame.remove(uuid4)
 
 def countdown():
+    timeLeft = 11
     timeLeft = timeLeft - 1      
     time.sleep(1)
     if len(playersInGame) != maxPlayers:
