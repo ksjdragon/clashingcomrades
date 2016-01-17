@@ -13,7 +13,7 @@ var spectatedUser;
 var numberOfPlayers;
 var canMove = false;
 // Colors
-var playerColors = {s
+var playerColors = {
     "red": "#E62E2E",
     "blue": "#4343D8"
 };
