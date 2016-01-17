@@ -45,7 +45,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
     // Update score before creating player so scoreboard starts at 0
     updateScore();
   	waitForPlayers();
-    document.onkeydown = movePlayer;
+    
 }
 
 function getInitial() {
@@ -114,18 +114,19 @@ function serverTransfer(coordinate,team,turn,username) {
 function waitForPlayers(uuid4) {
 	timer = setTimeout(function() {
 		// Sending "I'm here."
-		$.ajax({
-			url: 'http://127.0.0.1:5000/pregame',
-			type: 'GET',
-		    async: false,
-		    // data: '',
+		$.ajax('http://127.0.0.1:5000/pregame', {
+	        method: 'POST',
+	        type : "POST",
+	        data: JSON.stringify(uuid4, null, '\t'),
+	        async: false,
+	        dataType: "json",
+	        contentType: 'application/json;charset=UTF-8'
+
 		    success: function(data) {
-				//called when successful
-				numberOfPlayers = data
+				numberOfPlayers = data;
 				if (numberOfPlayers == '10') {
 					countdown();
 					// try catch delete table for visuals later.
-
 				}
 	  		},
 	  		error: function(e) {
@@ -134,46 +135,36 @@ function waitForPlayers(uuid4) {
 	  		}
 		})
 		.then(
-			function sendhere() {
-				$.ajax('http://127.0.0.1:5000/pregame', {
-			        method: 'POST',
-			        type : "POST",
-			        data: JSON.stringify(uuid4, null, '\t'),
-			        async: false,
-			        dataType: "json",
-			        contentType: 'application/json;charset=UTF-8'
-    			})
-    			.then(
-    				waitForPlayers();
-				);	
-			}
-		);
-		
-	}, 3000)
+			// Repeat this function until 10 players are here.
+    		waitForPlayers();
+			);		
+	}, 3000);
 }
 
 function countdown() {
-	$.ajax({
-		url: 'http://127.0.0.1:5000/pregame',
-		type: 'COUNT',
-		async: false,
-		success: function(data) {
-			//called when successful
-			timeLeft = data;
-			//MAKE VISUAL STUFF HERE
-			countdown()
-			if(timeLeft == 0) {
-				createPlayer();
-    			autoScroll('start');
-			}
-
-	  	},
-  		error: function(e) {
-			//called when there is an error
-			//(e.message);
-  		}	
-	})
+	timer = setTimeout(function() {
+		$.ajax({
+			url: 'http://127.0.0.1:5000/pregame',
+			type: 'GET',
+			async: false,
+			success: function(data) {
+				timeLeft = data;
+				//MAKE VISUAL STUFF HERE
+				if(timeLeft == 0) {
+					createPlayer();
+	    			autoScroll('start');
+	    			document.onkeydown = movePlayer;
+				}
+				countdown();
+		  	},
+	  		error: function(e) {
+				//called when there is an error
+				//(e.message);
+	  		}	
+		})
+	}, 750); //Prevent too many requests
 }
+
 // CREATION
 
 // Creation of Table 
