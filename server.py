@@ -10,7 +10,7 @@ vertical = 0
 playersInGame = []
 # Testing 1 Player for now
 maxPlayers = 2
-timeLeft = 11.0
+initialTime = 0
 
 # Renders client
 @app.route("/")
@@ -53,13 +53,14 @@ def update_game():
 
 @app.route('/pregame', methods=['GET','POST','EXIT'])
 def update_players():
-    global timeLeft
+    global initialTime
+    global maxPlayers
+
     if request.method == 'GET':
-        before = time.clock()
-        time.sleep(0.99)
-        after = time.clock()
-        timeTaken = after - before
-        timeLeft -= timeTaken
+        after = time.time()
+        timeSince = after - initialTime
+        timeLeft = 10 - timeSince
+        print timeLeft
 
         toReturn = {}
         toReturn["timeLeft"] = int(timeLeft)
@@ -67,18 +68,28 @@ def update_players():
 
     if request.method == 'POST':
         #Define the data given by client.
-        uuid4 = request.get_json(force=True)
+        username = request.get_json(force=True)
+        print username
+
         # If this client has not already registered with the server, register.
-        if not uuid4 in playersInGame:
-            playersInGame.append(uuid4)
+        if not username["username"] in playersInGame:
+            playersInGame.append(username["username"])
+
+        numberofplayers = len(playersInGame)
+        if numberofplayers == maxPlayers:
+            initialTime = time.time()
+
+        print numberofplayers
+
         toReturn = {}
-        toReturn["playersInGame"] = len(playersInGame)
+        toReturn["playersInGame"] = numberofplayers
+        
         return jsonify(toReturn)
         
-    if request.method == 'EXIT':
-        #Define the data given by client.
-        uuid4 = request.get_json(force=True)
-        playersInGame.remove(uuid4)
+    # if request.method == 'EXIT':
+    #     #Define the data given by client.
+    #     uuid4 = request.get_json(force=True)
+    #     playersInGame.remove(uuid4)
 
 # Eventual more than one game can be played on website
 
@@ -92,4 +103,4 @@ def update_players():
 #         return jsonify(games[game_id])
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0')

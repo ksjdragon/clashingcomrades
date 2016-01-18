@@ -11,6 +11,7 @@ var spectatorChoose = 1;
 var spectatedUser;
 var numberOfPlayers;
 var canMove = false;
+var serverurl = "http://68.56.19.11:5000"
 
 // Colors
 var playerColors = {
@@ -49,9 +50,8 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
 
 function getInitial() {
   $.ajax({
-    url: 'http://localhost:5000/game',
+    url: serverurl + '/game',
     type: 'GET',
-    async: false,
     // data: '',
     success: function(data) {
       //called when successful
@@ -73,11 +73,10 @@ function serverTransfer(coordinate,team,turn,username) {
     username: username
   };
   // Sending Data
-  $.ajax('http://localhost:5000/game', {
+  $.ajax(serverurl + '/game', {
     method: 'POST',
     type : "POST",
     data: JSON.stringify(move, null, '\t'),
-    async: false,
     dataType: "json",
     contentType: 'application/json;charset=UTF-8'
   })
@@ -110,25 +109,28 @@ function serverTransfer(coordinate,team,turn,username) {
     );
 }
 
-function waitForPlayers(uuid4) {
+function waitForPlayers(username) {
   timer = setTimeout(function() {
     // Sending "I'm here."
-    $.ajax('http://localhost:5000/pregame', {
+    var sending = {
+        username: username
+    };
+
+    $.ajax(serverurl + '/pregame', {
       method: 'POST',
       type : "POST",
-      data: JSON.stringify(uuid4, null, '\t'),
-      async: false,
+      data: JSON.stringify(sending, null, '\t'),
       dataType: "json",
       contentType: 'application/json;charset=UTF-8'
     })
       .then(
         function success(data) {
           numberOfPlayers = data.playersInGame;
-          if (numberOfPlayers == 1) {
+          if (numberOfPlayers == 2) {
             countdown();
             // try catch delete table for visuals later.
           } else {
-            waitForPlayers();
+            waitForPlayers(username);
           }
         },
         function error(e) {
@@ -143,9 +145,8 @@ function waitForPlayers(uuid4) {
 function countdown() {
   timer = setTimeout(function() {
     $.ajax({
-      url: 'http://localhost:5000/pregame',
+      url: serverurl + '/pregame',
       type: 'GET',
-      async: false,
       success: function(data) {
     timeLeft = data.timeLeft;
     console.log(data);
