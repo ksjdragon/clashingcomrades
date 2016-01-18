@@ -9,7 +9,7 @@ color = 0
 vertical = 0
 playersInGame = []
 # Testing 1 Player for now
-maxPlayers = 1
+maxPlayers = 2
 timeLeft = 11.0
 
 # Renders client
