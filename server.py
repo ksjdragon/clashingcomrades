@@ -10,7 +10,7 @@ vertical = 0
 playersInGame = []
 # Testing 1 Player for now
 maxPlayers = 1
-timeLeft = 11
+timeLeft = 11.0
 
 # Renders client
 @app.route("/")
@@ -53,11 +53,16 @@ def update_game():
 
 @app.route('/pregame', methods=['GET','POST','EXIT'])
 def update_players():
-    
+    global timeLeft
     if request.method == 'GET':
-        countdown()
+        before = time.clock()
+        time.sleep(0.99)
+        after = time.clock()
+        timeTaken = after - before
+        timeLeft -= timeTaken
+
         toReturn = {}
-        toReturn["timeLeft"] = timeLeft
+        toReturn["timeLeft"] = int(timeLeft)
         return jsonify(toReturn)
 
     if request.method == 'POST':
@@ -74,15 +79,6 @@ def update_players():
         #Define the data given by client.
         uuid4 = request.get_json(force=True)
         playersInGame.remove(uuid4)
-
-def countdown():
-    timeLeft = 11
-    timeLeft = timeLeft - 1      
-    time.sleep(1)
-    if len(playersInGame) != maxPlayers:
-        timeLeft = 11
-    else:
-        countdown()
 
 # Eventual more than one game can be played on website
 

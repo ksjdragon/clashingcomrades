@@ -50,7 +50,7 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
 
 function getInitial() {
 	$.ajax({
-	  url: 'http://127.0.0.1:5000/pregame',
+	  url: 'http://localhost:5000/game',
 	  type: 'GET',
       async: false,
 	  // data: '',
@@ -74,7 +74,7 @@ function serverTransfer(coordinate,team,turn,username) {
         username: username
     };
     // Sending Data
-    $.ajax('http://127.0.0.1:5000/game', {
+    $.ajax('http://localhost:5000/game', {
         method: 'POST',
         type : "POST",
         data: JSON.stringify(move, null, '\t'),
@@ -112,56 +112,53 @@ function serverTransfer(coordinate,team,turn,username) {
 }
 
 function waitForPlayers(uuid4) {
-    repeat = true;
-    while (repeat == true) {
-    	timer = setTimeout(function() {
-    		// Sending "I'm here."
-    		$.ajax('http://127.0.0.1:5000/pregame', {
-    	        method: 'POST',
-    	        type : "POST",
-    	        data: JSON.stringify(uuid4, null, '\t'),
-    	        async: false,
-    	        dataType: "json",
-    	        contentType: 'application/json;charset=UTF-8',
-
-    		    success: function(data) {
-    				numberOfPlayers = data["playersInGame"];
-    				if (numberOfPlayers == 1) {
-    					countdown();
-                        repeat = false
-    					// try catch delete table for visuals later.
-    				}
-    	  		},
-    	  		error: function(e) {
-    				//called when there is an error
-    				//(e.message);
-    	  		}
-    		})
-    		.then(
-    			// Repeat this function until 10 players are here.
-        		function success (data) {
-                    repeat = true
+	timer = setTimeout(function() {
+		// Sending "I'm here."
+		$.ajax('http://localhost:5000/pregame', {
+	        method: 'POST',
+	        type : "POST",
+	        data: JSON.stringify(uuid4, null, '\t'),
+	        async: false,
+	        dataType: "json",
+	        contentType: 'application/json;charset=UTF-8',
+        })
+		.then(
+            function success(data) {
+                numberOfPlayers = data["playersInGame"];
+                if (numberOfPlayers == 1) {
+                    countdown();
+                    // try catch delete table for visuals later.
+                } else {
+                    waitForPlayers();
                 }
-    		);		
-	   }, 3000);
-    }
+            },
+            function error(e) {
+                //called when there is an error
+                //(e.message);
+            }
+			// Repeat this function until 10 players are here.
+		);		
+   }, 3000);
 }
 
 function countdown() {
 	timer = setTimeout(function() {
 		$.ajax({
-			url: 'http://127.0.0.1:5000/pregame',
+			url: 'http://localhost:5000/pregame',
 			type: 'GET',
 			async: false,
 			success: function(data) {
 				timeLeft = data["timeLeft"];
+				console.log(data)
 				//MAKE VISUAL STUFF HERE
 				if(timeLeft == 0) {
+                    canMove = true;
 					createPlayer();
 	    			autoScroll('start');
 	    			document.onkeydown = movePlayer;
-				}
-				countdown();
+				} else {
+				    countdown();
+                }
 		  	},
 	  		error: function(e) {
 				//called when there is an error
