@@ -33,7 +33,8 @@ def update_game():
         vertical = vertical + 1
         answer = {
             "team": team,
-            "coordinate": [vertical, horizontal]
+            "coordinate": [vertical, horizontal],
+            "max": maxPlayers
         }
 
         return jsonify(answer)

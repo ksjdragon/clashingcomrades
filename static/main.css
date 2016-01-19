@@ -42,7 +42,7 @@ td {
     margin-left:5%;
 }
 
-.scoreboard, .spectator {
+.scoreboard, .spectator, .info {
     font-family: Lato;
     color: #ffffff;
     position: fixed;
@@ -64,6 +64,13 @@ td {
     margin-left: 86%;
     margin-right: 1%;
     margin-top: 45%;
+}
+
+.info {
+    padding: 10px 15px 10px 15px;
+    font-size: 30px;
+    margin-left: 40%;
+    bottom: 0;
 }
 
 #redscore {
