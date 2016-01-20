@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import render_template, jsonify, request
 import time
+import random
 app = Flask(__name__)
 
 # Since only one game for now, this is the object that will hold the data for the game
@@ -8,9 +9,15 @@ game = {}
 color = 0
 vertical = 0
 playersInGame = []
-# Testing 1 Player for now
 maxPlayers = 2
 initialTime = 0
+timeLeft = 3
+
+def RandomMove(playerStatus):
+    x = [1,0]
+    random.shuffle(x)
+    game[playerStatus["username"]][0] = [x[0] + game[playerStatus["username"]][0][0], x[1] + game[playerStatus["username"]][0][1]]
+
 
 # Renders client
 @app.route("/")
@@ -18,41 +25,64 @@ def initial():
     return render_template('index.html')
 
 # The URL where the data transfer takes place, the "backend"
-@app.route('/game', methods=['GET', 'POST'])
+@app.route('/game', methods=['POST'])
 def update_game():
-
-    # This is for if the Client Wants something
-    # Eventually will be used for initial team and coordinate
-    # Not currently being used anywhere
-    if request.method == 'GET':
-        global color
-        global vertical
-        color = color + 1
-        team = ["red", "blue"][color % 2]
-        horizontal = 10 + color % 2
-        vertical = vertical + 1
-        answer = {
-            "team": team,
-            "coordinate": [vertical, horizontal],
-            "max": maxPlayers
-        }
-
-        return jsonify(answer)
 
     # What to do when the Client tells the server something
     if request.method == 'POST':
+        global timeLeft
         # Define the data given by client
         playerStatus = request.get_json(force=True)
+
+        if timeLeft == 3:
+            origin = time.time()
+
+
+        if len(playerStatus[playerStatus.keys()[0]]) == 1:
+            if playerStatus[playerStatus.keys()[0]][0] == "death":
+                del game[playerStatus["username"]]
+            else:
+                global color
+                global vertical
+                color = color + 1
+                team = ["red", "blue"][color % 2]
+                horizontal = 10 + color % 2
+                vertical = vertical + 1
+                answer = {
+                    "team": team,
+                    "coordinate": [vertical, horizontal],
+                    "max": maxPlayers
+                }
+
+                game[playerStatus[playerStatus.keys()[0]][0]] = [[vertical, horizontal], team]
+
+                while time.time() - origin < 3:
+                    time.sleep(0.2)
+
+                
+                timeLeft = 3
+                return jsonify(answer)
+
+
         # If the username that the player sent is already defined in game
-        if playerStatus["username"] in game:
-            game[playerStatus["username"]].append([playerStatus["turn"], playerStatus["coordinate"], playerStatus["team"]])
+        elif playerStatus["username"] in game:
+            if abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
+                coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
+                coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]
+                game[playerStatus["username"]][0] = [coord1, coord2]
+
+            else:
+                print "Hax?"
+                RandomMove(playerStatus)
+
+
         else:
-            game[playerStatus["username"]] = [[playerStatus["turn"], playerStatus["coordinate"], playerStatus["team"]]]
+            return "Hax"
 
         # Return the game with the information you added, in addition to everyone else
         return jsonify(game)
 
-@app.route('/pregame', methods=['GET','POST','EXIT'])
+@app.route('/pregame', methods=['GET','POST'])
 def update_players():
     global initialTime
     global maxPlayers
@@ -62,10 +92,9 @@ def update_players():
         timeSince = after - initialTime
         timeLeft = 10 - timeSince
         print timeLeft
+        game["timeLeft"] = timeLeft
 
-        toReturn = {}
-        toReturn["timeLeft"] = int(timeLeft)
-        return jsonify(toReturn)
+        return jsonify(game)
 
     if request.method == 'POST':
         #Define the data given by client.
@@ -104,4 +133,5 @@ def update_players():
 #         return jsonify(games[game_id])
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    # app.run(host='0.0.0.0')
+    app.run(debug=True, threaded=True)
