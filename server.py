@@ -56,11 +56,6 @@ def update_game():
 
                 game[playerStatus[playerStatus.keys()[0]][0]] = [[vertical, horizontal], team]
 
-                while time.time() - origin < 3:
-                    time.sleep(0.2)
-
-                
-                timeLeft = 3
                 return jsonify(answer)
 
 
@@ -80,6 +75,9 @@ def update_game():
             return "Hax"
 
         # Return the game with the information you added, in addition to everyone else
+        while (time.time() - origin) < 3:
+                    time.sleep(0.1)
+        timeLeft = 3
         return jsonify(game)
 
 @app.route('/pregame', methods=['GET','POST'])
