@@ -1,18 +1,20 @@
 // Global Variables 
-var playerCoordinate;
-var username;
-var playerTeam;
-var timer;
-var type;
-var playerColor;
-var claimColor;
-var turn = 0;
-var spectatorChoose = 1;
-var spectatedUser;
-var numberOfPlayers = 1;
-var canMove = false;
-var serverurl = "http://activate.adobe.com:5000"
+var playerInfo = {};
 var maxPlayers;
+
+// Client Player Info
+var myTeam;
+var myCoord;
+var myUsername
+
+var type;
+
+/*var spectatorChoose = 1;
+var spectatedUser;*/
+
+var numberOfPlayers = 1;
+var serverURL = "http://activate.adobe.com:5000"
+
 
 // Colors
 var playerColors = {
@@ -24,7 +26,26 @@ var claimedColors = {
     "blue": "#9999FF"
 };
 
-document.getElementsByClassName('play')[0].onclick = function startGame() {
+document.getElementsByClassName('play')[0].onclick = function initialize() {
+
+    var login = document.getElementById("login");
+    login.parentNode.removeChild(login);
+
+    getInitial(); // Gets team, coordinate, and max lobby players.
+    
+    // TODO IP Handling, most likely not necessary
+
+    // Create scoreboard before table to prevent CSS glitching.
+    createScoreboard();
+    createInfo();
+    createTable();
+    // Update score before creating player so scoreboard starts at 0
+    updateScore();
+    waitForPlayers();
+};
+
+function getInitial() {
+
     uuid4 = function() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, _uuid4);
     };
@@ -34,95 +55,41 @@ document.getElementsByClassName('play')[0].onclick = function startGame() {
         return (cc === 'x' ? rr : (rr & 0x3 | 0x8)).toString(16);
     };
 
-    username = uuid4();
-    spectatedUser = username;
-    getInitial();
-    
-    // TODO IP Handling, most likely not necessary
-
-    var login = document.getElementById("login");
-    login.parentNode.removeChild(login);
-    // Create scoreboard before table to prevent css glitching
-    createScoreboard();
-    createInfo();
-    createTable();
-    // Update score before creating player so scoreboard starts at 0
-    updateScore();
-    waitForPlayers(username);
-};
-
-function getInitial() {
-    $.ajax({
-        url: serverurl + '/game',
-        type: 'GET',
-        // data: '',
-        success: function(data) {
-            //called when successful
-            playerCoordinate = data.coordinate;
-            playerTeam = data.team;
-            maxPlayers = data.max;
-        },
-        error: function(e) {
-            //called when there is an error
-            //1(e.message);
-        }
-    });
-}
-
-function serverTransfer(coordinate,team,turn,username) {
-    var move = {
-        coordinate: coordinate,
-        team: team,
-        turn: turn,
-        username: username
+    myUsername = uuid4();
+    var userId = {
+        username: myUsername
     };
-    // Sending Data
-    $.ajax(serverurl + '/game', {
-        method: 'POST',
-        type : "POST",
-        data: JSON.stringify(move, null, '\t'),
+
+    $.ajax({
+        url: serverURL + '/game',
+        type: 'POST',
+        type : 'POST',
+        data: JSON.stringify(userId, null, '\t'),
         dataType: "json",
         contentType: 'application/json;charset=UTF-8'
     })
-    // Server Response
     .then(
         function success(data) {
-            for (var user in data) {
-                if (data.hasOwnProperty(user) &&
-                        (user != username) &&
-                        (data[user].length > turn) &&
-                        (data[user][turn][2] != "spectator")
-                     ) {
-                    if ((data[user].length > data[spectatedUser].length) &&
-                         data[spectatedUser][turn][2] === "spectator") {
-                        spectatedUser = user;
-                    }
-                    var theMove = data[user][turn];
-                    updateTable(user, theMove[1], theMove[2]);
-                    if (theMove[2] != "spectator") {
-                        var oldMove = data[user][turn - 1];
-                        updateOldTable(oldMove[1], oldMove[2]);
-                    }
-                }
-            }
+            myTeam = data.team;
+            myCoord = data.coordinate
+            maxPlayers = data.max;
         },
-
-        function fail(data, status) {
-            alert('Request failed.    Returned status of ' + status);
+        function error(e) {
+            console.log(e);
+            alert(e);
         }
     );
 }
 
-function waitForPlayers(username) {
-    timer = setTimeout(function() {
-        // Sending "I'm here."
+function waitForPlayers() {
+    timer1 = setTimeout(function() {
         var sending = {
-                username: username
+                username: myUsername
         };
 
-        $.ajax(serverurl + '/pregame', {
+        $.ajax(serverURL + '/pregame', {
             method: 'POST',
-            type : "POST",
+            type : 'POST',
             data: JSON.stringify(sending, null, '\t'),
             dataType: "json",
             contentType: 'application/json;charset=UTF-8'
@@ -134,49 +101,70 @@ function waitForPlayers(username) {
                 if (numberOfPlayers == maxPlayers) {
                     countdown();
                 } else {
-                    waitForPlayers(username);
+                    waitForPlayers();
                 }
             },
             function error(e) {
-                //called when there is an error
-                //(e.message);
+                console.log(e);
+                alert(e);
             }
         );                
     }, 3000);
 }
 
 function countdown() {
-    timer = setTimeout(function() {
+    timer2 = setTimeout(function() {
         $.ajax({
-            url: serverurl + '/pregame',
+            url: serverURL + '/pregame',
             type: 'GET',
             success: function(data) {
                 timeLeft = data.timeLeft;
-                console.log(data);
                 updateTimer(timeLeft);
-                if (timeLeft === 0) {
-                    canMove = true;
-                    createPlayer();
-                    autoScroll('start');
-                    document.onkeydown = movePlayer;
-                    remove = document.getElementsByClassName("info")[0];
-                    remove.parentNode.removeChild(remove);
+                delete data['timeLeft'];
+                playerInfo = data;
+                animate();
 
-                    if (playerCoordinate[1] == 10) {
-                        movement(-1,0);  
-                    } else {
-                        movement(1,0);
-                    }
-                } else {
-                    countdown();
-                }
+                if (timeLeft === 0) {
+                    startGame();
             },
             error: function(e) {
-            //called when there is an error
-            //(e.message);
+                console.log(e);
+                alert(e);
             } 
         });
     }, 250); //Prevent too many requests
+}
+
+function startGame() {
+    remove = document.getElementsByClassName("info")[0];
+    remove.parentNode.removeChild(remove);
+    //SET UP VISUALS
+}
+
+function sendMove(x,y) {
+    var move = {
+        coordinate: [x,y],
+        team: myTeam,
+        username: myUsername,
+    };
+
+    $.ajax(serverURL + '/game', {
+        method: 'POST',
+        type : 'POST',
+        data: JSON.stringify(move, null, '\t'),
+        dataType: "json",
+        contentType: 'application/json;charset=UTF-8'
+    })
+    .then(
+        function success(data) {
+            playerInfo = data;
+            animate();
+        },
+        function error(e) {
+            console.log(e);
+            alert(e);
+        }
+    );
 }
 
 // CREATION
@@ -217,15 +205,6 @@ function createScoreboard() {
     blueNumber.appendChild(document.createTextNode(""));
 }
 
-// Creation of Player 
-
-function createPlayer() {
-    startSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
-    startSquare.style.backgroundColor = playerColors[playerTeam];
-    startSquare.className = "player " + playerTeam;
-    startSquare.id = username;
-}
-
 // Creation of Information box
 
 function createInfo() {
@@ -235,20 +214,6 @@ function createInfo() {
 }
 
 // UPDATING
-
-function updateTable(username, coordinate, team) {
-    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
-    otherPlayer.style.backgroundColor = playerColors[team];
-    otherPlayer.className = "player " + team; 
-    otherPlayer.id = username;
-}
-
-function updateOldTable(coordinate, team) {
-    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
-    otherPlayer.style.backgroundColor = claimedColors[team];
-    otherPlayer.className = otherPlayer.className.replace("player ", "");
-    otherPlayer.id = "";
-}
 
 function updateScore() {
     var score = [
@@ -269,9 +234,36 @@ function updateTimer(timeLeft) {
 
 // PLAYER HANDLING 
 
-function movement(x,y) {
-    if (playerTeam != "spectator") {
-        try {
+function animate(x,y) {
+    for (var user in playerInfo) {
+        if (data.hasOwnProperty(user)) {
+            var playerCoord = data[user]['coordinate'];
+            var playerTeam = data[user]['team'];
+
+            //if coords out of bounds, animate kill
+
+
+        }
+    }
+    /* func create player
+    startSquare = table.rows[coordinate[0]].cells[coordinate[1]];
+    startSquare.style.backgroundColor = playerColors[team];
+    startSquare.className = "player " + team;
+    startSquare.id = username;
+
+            function updateTable(coordinate, team, username) {
+    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
+    otherPlayer.style.backgroundColor = playerColors[team];
+    otherPlayer.className = "player " + team; 
+    otherPlayer.id = username;
+}
+
+function updateOldTable(coordinate, team) {
+    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
+    otherPlayer.style.backgroundColor = claimedColors[team];
+    otherPlayer.className = otherPlayer.className.replace("player ", "");
+    otherPlayer.id = "";
+}
             previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
             nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
         } catch(err) {
@@ -279,7 +271,10 @@ function movement(x,y) {
             killPlayer(playerCoordinate, playerTeam);
         }
     }
-
+  deathSquare = table.rows[coordinate[0]].cells[coordinate[1]];
+            deathSquare.style.backgroundColor = claimedColors[team]; 
+            deathSquare.className = deathSquare.className.replace("player ", "");
+            deathSquare.id = "";
     timer =
         setTimeout(function() {
             try {
@@ -312,44 +307,56 @@ function movement(x,y) {
                 killPlayer(playerCoordinate, playerTeam);
             }
         }, 100);
-}
+}*/
 
 function movePlayer(e) {
 
-    if (canMove) {
-        e = e || window.event;
+    e = e || window.event;
 
-        if (e.keyCode === 38 && type != "up") {
-            type = "up";
-            clearTimeout(timer);
-            movement(0,-1);
-        } else if (e.keyCode === 40 && type != "down") {
-            type = "down";
-            clearTimeout(timer);
-            movement(0,1);
-        } else if (e.keyCode === 37 && type != "left") {
-            type = "left";
-            clearTimeout(timer);
-            movement(-1,0);
-        } else if (e.keyCode === 39 && type != "right") {
-            type = "right";
-            clearTimeout(timer);
-            movement(1,0);
-        }
+    if (e.keyCode === 38 && type != "up") {
+        type = "up";
+        sendMove(0,-1);
+    } else if (e.keyCode === 40 && type != "down") {
+        type = "down";
+        sendMove(0,1);
+    } else if (e.keyCode === 37 && type != "left") {
+        type = "left";
+        sendMove(-1,0);
+    } else if (e.keyCode === 39 && type != "right") {
+        type = "right";
+        sendMove(1,0);
     }
 }
+
 function killPlayer(coordinate, team) {
-    if (playerTeam != "spectator") {
-        deathSquare = table.rows[coordinate[0]].cells[coordinate[1]];
-        deathSquare.style.backgroundColor = claimedColors[team]; 
-        deathSquare.className = deathSquare.className.replace("player ", "");
-        deathSquare.id = "";
-    }
-    // Spectator mode first to set team to spectator
-    spectatorMode();
-    serverTransfer(coordinate,team,turn,username);     
-}
+    var death = {
+        myUsername: ["death"]
+    };
 
+    $.ajax(serverURL + '/game', {
+        method: 'POST',
+        type : 'POST',
+        data: JSON.stringify(death, null, '\t'),
+        dataType: "json",
+        contentType: 'application/json;charset=UTF-8'
+    })
+    .then(
+        function success(data) {
+            animate();
+            // Spectator mode first to set team to spectator
+            //spectatorMode();
+            //serverTransfer(coordinate,team,turn,username);  
+
+        },
+        function error(e) {
+            console.log(e);
+            alert(e);
+        }
+    );
+   
+       
+}
+/*
 function spectatorMode() {
     playerCoordinate = null;
     playerTeam = 'spectator';
@@ -376,7 +383,8 @@ function spectatorFull() {
         document.getElementsByTagName('td')[i].style.minWidth = "75px";
         document.getElementsByTagName('td')[i].style.height = "75px";
     }
-}
+}*/
+
 function autoScroll(type) {
     center = [
         window.innerHeight / -2,
