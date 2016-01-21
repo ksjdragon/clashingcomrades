@@ -13,10 +13,10 @@ maxPlayers = 2
 initialTime = 0
 timeLeft = 3
 
-def RandomMove(playerStatus):
+def RandomMove(username):
     x = [1,0]
     random.shuffle(x)
-    game[playerStatus["username"]][0] = [x[0] + game[playerStatus["username"]][0][0], x[1] + game[playerStatus["username"]][0][1]]
+    game[username][0] = [x[0] + game[username][0][0], x[1] + game[username][0][1]]
 
 
 # Renders client
@@ -30,17 +30,21 @@ def update_game():
 
     # What to do when the Client tells the server something
     if request.method == 'POST':
+        if "timeLeft" in game:
+            del game["timeLeft"]
+        noMove = game.keys()
         global timeLeft
         # Define the data given by client
         playerStatus = request.get_json(force=True)
 
         if timeLeft == 3:
-            origin = time.time()
+            timeLeft = time.time()
 
 
         if len(playerStatus[playerStatus.keys()[0]]) == 1:
             if playerStatus[playerStatus.keys()[0]][0] == "death":
-                del game[playerStatus["username"]]
+                del game[playerStatus.keys()[0]]
+                del noMove[noMove.index(playerStatus.keys()[0])]
             else:
                 global color
                 global vertical
@@ -61,22 +65,29 @@ def update_game():
 
         # If the username that the player sent is already defined in game
         elif playerStatus["username"] in game:
-            if abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
-                coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
-                coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]
-                game[playerStatus["username"]][0] = [coord1, coord2]
+            elif abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
+                if playerStatus["username"] in noMove:
+                    coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
+                    coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]
+                    game[playerStatus["username"]][0] = [coord1, coord2]
+                    del noMove[noMove.index(playerStatus["username"])]
 
             else:
                 print "Hax?"
-                RandomMove(playerStatus)
+                RandomMove(playerStatus["username"])
+                del noMove[noMove.index(playerStatus["username"])]
 
 
         else:
             return "Hax"
 
         # Return the game with the information you added, in addition to everyone else
-        while (time.time() - origin) < 3:
+        while (time.time() - timeLeft) < 3:
                     time.sleep(0.1)
+
+        
+        for player in noMove:
+            RandomMove(player)
         timeLeft = 3
         return jsonify(game)
 
