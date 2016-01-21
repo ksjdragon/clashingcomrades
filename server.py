@@ -43,8 +43,8 @@ def update_game():
 
         if len(playerStatus[playerStatus.keys()[0]]) == 1:
             if playerStatus[playerStatus.keys()[0]][0] == "death":
-                del game[playerStatus["username"]]
-                del noMove[noMove.index(playerStatus["username"])]
+                del game[playerStatus.keys()[0]]
+                del noMove[noMove.index(playerStatus.keys()[0])]
             else:
                 global color
                 global vertical
@@ -65,11 +65,12 @@ def update_game():
 
         # If the username that the player sent is already defined in game
         elif playerStatus["username"] in game:
-            if abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
-                coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
-                coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]
-                game[playerStatus["username"]][0] = [coord1, coord2]
-                del noMove[noMove.index(playerStatus["username"])]
+            elif abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
+                if playerStatus["username"] in noMove:
+                    coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
+                    coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]
+                    game[playerStatus["username"]][0] = [coord1, coord2]
+                    del noMove[noMove.index(playerStatus["username"])]
 
             else:
                 print "Hax?"
