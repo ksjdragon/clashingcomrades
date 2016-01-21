@@ -9,7 +9,7 @@ game = {}
 color = 0
 vertical = 0
 playersInGame = []
-maxPlayers = 2
+maxPlayers = 1
 initialTime = 0
 timeLeft = 3
 
@@ -65,7 +65,7 @@ def update_game():
 
         # If the username that the player sent is already defined in game
         elif playerStatus["username"] in game:
-            elif abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
+            if abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
                 if playerStatus["username"] in noMove:
                     coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
                     coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]

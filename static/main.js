@@ -1,20 +1,27 @@
 // Global Variables 
 var playerInfo = {};
 var maxPlayers;
+var numberOfPlayers = 1;
 
 // Client Player Info
-var myTeam;
+var myTeam; 
 var myCoord;
-var myUsername
+var myUsername;
 
-var type;
+// Animation Handling
+var move; // Prevents move spam.
+var moveTimer;
+var setup = true;
 
 /*var spectatorChoose = 1;
 var spectatedUser;*/
 
-var numberOfPlayers = 1;
-var serverURL = "http://activate.adobe.com:5000"
+// Timeout Handling
+var canSend = true;
+var turnTime = 3;
+var hasSent = false;
 
+var serverURL = "http://activate.adobe.com:5000"
 
 // Colors
 var playerColors = {
@@ -57,7 +64,7 @@ function getInitial() {
 
     myUsername = uuid4();
     var userId = {
-        username: myUsername
+        username: [myUsername]
     };
 
     $.ajax({
@@ -71,12 +78,13 @@ function getInitial() {
     .then(
         function success(data) {
             myTeam = data.team;
-            myCoord = data.coordinate
+            myCoord = data.coordinate;
             maxPlayers = data.max;
+
         },
         function error(e) {
             console.log(e);
-            alert(e);
+            alert("Error, intial");
         }
     );
 }
@@ -84,7 +92,7 @@ function getInitial() {
 function waitForPlayers() {
     timer1 = setTimeout(function() {
         var sending = {
-                username: myUsername
+                username: [myUsername]
         };
 
         $.ajax(serverURL + '/pregame', {
@@ -106,7 +114,7 @@ function waitForPlayers() {
             },
             function error(e) {
                 console.log(e);
-                alert(e);
+                alert("Error, waiting");
             }
         );                
     }, 3000);
@@ -118,53 +126,66 @@ function countdown() {
             url: serverURL + '/pregame',
             type: 'GET',
             success: function(data) {
-                timeLeft = data.timeLeft;
+                timeLeft = parseInt(data.timeLeft, 10);
                 updateTimer(timeLeft);
                 delete data['timeLeft'];
                 playerInfo = data;
                 animate();
-
+                
                 if (timeLeft === 0) {
                     startGame();
+                } else {
+                    countdown();
+                }
             },
             error: function(e) {
                 console.log(e);
-                alert(e);
+                alert("Error, countdown");
             } 
         });
     }, 250); //Prevent too many requests
 }
 
 function startGame() {
-    remove = document.getElementsByClassName("info")[0];
-    remove.parentNode.removeChild(remove);
-    //SET UP VISUALS
+    document.onkeydown = movePlayer;
+    document.getElementsByClassName('info')[0].childNodes[0].nodeValue = "Next Turn: 3"
+    timeMove();
+    autoScroll('start');
+    setup = false;
 }
 
 function sendMove(x,y) {
-    var move = {
-        coordinate: [x,y],
-        team: myTeam,
-        username: myUsername,
-    };
+    if (canSend) {
+        canSend = false;
+        hasSent = true;
+        var move = {
+            coordinate: [x,y],
+            team: myTeam,
+            username: myUsername,
+        };
 
-    $.ajax(serverURL + '/game', {
-        method: 'POST',
-        type : 'POST',
-        data: JSON.stringify(move, null, '\t'),
-        dataType: "json",
-        contentType: 'application/json;charset=UTF-8'
-    })
-    .then(
-        function success(data) {
-            playerInfo = data;
-            animate();
-        },
-        function error(e) {
-            console.log(e);
-            alert(e);
-        }
-    );
+        $.ajax(serverURL + '/game', {
+            method: 'POST',
+            type : 'POST',
+            data: JSON.stringify(move, null, '\t'),
+            dataType: "json",
+            contentType: 'application/json;charset=UTF-8'
+        })
+        .then(
+            function success(data) {
+                playerInfo = data;
+                animate();
+                timeMove();
+                updateScore();
+                canSend = true;
+                hasSent = false;
+            },
+            function error(e) {
+                console.log(e);
+                alert("Error, move");
+            }
+        );
+    }
 }
 
 // CREATION
@@ -225,7 +246,7 @@ function updateScore() {
 }
 
 function updateInfo() {
-    document.getElementsByClassName("info")[0].childNodes[0].nodeValue = "Players in lobby: " + numberOfPlayers;
+    document.getElementsByClassName("info")[0].childNodes[0].nodeValue = "Players In Lobby: " + numberOfPlayers;
 }
 
 function updateTimer(timeLeft) {
@@ -234,104 +255,80 @@ function updateTimer(timeLeft) {
 
 // PLAYER HANDLING 
 
-function animate(x,y) {
+function animate() {
     for (var user in playerInfo) {
-        if (data.hasOwnProperty(user)) {
-            var playerCoord = data[user]['coordinate'];
-            var playerTeam = data[user]['team'];
+        if (playerInfo.hasOwnProperty(user)) {
+            var playerCoord = playerInfo[user][0];
+            var playerTeam = playerInfo[user][1];
+            var lastSquare;
+            var newSquare;
 
-            //if coords out of bounds, animate kill
-
-
-        }
-    }
-    /* func create player
-    startSquare = table.rows[coordinate[0]].cells[coordinate[1]];
-    startSquare.style.backgroundColor = playerColors[team];
-    startSquare.className = "player " + team;
-    startSquare.id = username;
-
-            function updateTable(coordinate, team, username) {
-    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
-    otherPlayer.style.backgroundColor = playerColors[team];
-    otherPlayer.className = "player " + team; 
-    otherPlayer.id = username;
-}
-
-function updateOldTable(coordinate, team) {
-    otherPlayer = table.rows[coordinate[0]].cells[coordinate[1]];
-    otherPlayer.style.backgroundColor = claimedColors[team];
-    otherPlayer.className = otherPlayer.className.replace("player ", "");
-    otherPlayer.id = "";
-}
-            previousSquare = table.rows[playerCoordinate[0]].cells[playerCoordinate[1]];
-            nextSquare = table.rows[playerCoordinate[0] + y].cells[playerCoordinate[1] + x];
-        } catch(err) {
-            //Hitting top/down
-            killPlayer(playerCoordinate, playerTeam);
-        }
-    }
-  deathSquare = table.rows[coordinate[0]].cells[coordinate[1]];
-            deathSquare.style.backgroundColor = claimedColors[team]; 
-            deathSquare.className = deathSquare.className.replace("player ", "");
-            deathSquare.id = "";
-    timer =
-        setTimeout(function() {
             try {
-                if (nextSquare === undefined ||
-                        nextSquare.className.includes('player') ||
-                        playerTeam === "spectator" ||
-                        nextSquare.className.includes(playerTeam)) {
-                    killPlayer(playerCoordinate, playerTeam);
+                if(!setup) {
+                    lastSquare = document.getElementById(user);
+                    toClaimed(lastSquare, playerTeam); 
                 }
-                else {
-                    // Changing new square
-                    nextSquare.style.backgroundColor = playerColors[playerTeam];
-                    nextSquare.className = "player " + playerTeam;
-                    nextSquare.id = username;
-                    // Resetting old square
-                    previousSquare.style.backgroundColor = claimedColors[playerTeam];
-                    previousSquare.className = previousSquare.className.replace("player ", "");
-                    previousSquare.id = "";
-                    // Recursive actions
-                    playerCoordinate = [playerCoordinate[0] + y, playerCoordinate[1] + x];
-                    updateScore();
-                    serverTransfer(playerCoordinate,playerTeam,turn,username);
+            }
+            catch(err) {}
+            finally {
+                try {
+                    newSquare = coord(playerCoord[0],playerCoord[1]);
+                    if(newSquare.className.includes("blue") || newSquare.className.includes("red")) {
+                        if(!setup) {
+                           killPlayer(lastSquare); 
+                        }
+                    } else {
+                        toPlayer(newSquare, playerTeam, user); 
+                    }    
                 }
-                turn = turn + 1;
-                autoScroll('spectator');
-                movement(x,y);
+                catch(err) {
+                    console.log("errtoplayer")
+                    killPlayer(lastSquare);
+                }
             }
-            catch(err) {
-                // Hitting left/right
-                killPlayer(playerCoordinate, playerTeam);
-            }
-        }, 100);
-}*/
+        }
+    }
+    autoScroll('start');
+}
+
+function coord(x,y) {
+    return table.rows[x].cells[y];
+}
+
+function toPlayer(square,team,username) {
+    square.className = "player " + team;
+    square.style.backgroundColor = playerColors[team];
+    square.id = username;
+}
+
+function toClaimed(square,team) {
+    square.style.backgroundColor = claimedColors[team];
+    square.className = square.className.replace("player ", "");
+    square.id = "";
+}
 
 function movePlayer(e) {
 
     e = e || window.event;
 
-    if (e.keyCode === 38 && type != "up") {
-        type = "up";
-        sendMove(0,-1);
-    } else if (e.keyCode === 40 && type != "down") {
-        type = "down";
-        sendMove(0,1);
-    } else if (e.keyCode === 37 && type != "left") {
-        type = "left";
+    if (e.keyCode === 38) {
+
         sendMove(-1,0);
-    } else if (e.keyCode === 39 && type != "right") {
-        type = "right";
+    } else if (e.keyCode === 40) {
+
         sendMove(1,0);
+    } else if (e.keyCode === 37) {
+
+        sendMove(0,-1);
+    } else if (e.keyCode === 39) {
+
+        sendMove(0,1);
     }
 }
 
-function killPlayer(coordinate, team) {
-    var death = {
-        myUsername: ["death"]
-    };
+function killPlayer(square) {
+    var death = {};
+    death[myUsername] = ["death"];
 
     $.ajax(serverURL + '/game', {
         method: 'POST',
@@ -342,19 +339,32 @@ function killPlayer(coordinate, team) {
     })
     .then(
         function success(data) {
-            animate();
+            toClaimed(square,myTeam);
+            sendMove(0,0);
             // Spectator mode first to set team to spectator
             //spectatorMode();
             //serverTransfer(coordinate,team,turn,username);  
-
         },
         function error(e) {
             console.log(e);
             alert(e);
         }
-    );
-   
-       
+    );     
+}
+
+function timeMove() {
+    document.getElementsByClassName("info")[0].childNodes[0].nodeValue = "Next Turn: " + turnTime;
+    if(turnTime == 0) {
+        turnTime = 3;
+        if(!hasSent) {
+            sendMove(0,0);
+        }
+    } else {
+        moveTimer = setTimeout(function() {
+            turnTime -= 1;
+            timeMove();
+        }, 1000)
+    }
 }
 /*
 function spectatorMode() {
@@ -391,7 +401,7 @@ function autoScroll(type) {
         window.innerWidth / -2
     ];
     if(type == 'start') {
-        $('body').scrollTo(document.getElementById(username), 0, {offset: {top: center[0] , left: center[1]} });
+        $('body').scrollTo(document.getElementById(myUsername), 0, {offset: {top: center[0] , left: center[1]} });
     } else if (type == "spectator") {
         $('body').scrollTo(document.getElementById(spectatedUser), 100, {offset: {top: center[0] , left: center[1]} });
     } else {
