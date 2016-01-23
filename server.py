@@ -64,12 +64,11 @@ def update_game():
 
 
         # If the username that the player sent is already defined in game
+
         elif playerStatus["username"] in game:
             if playerStatus["username"] in noMove:
                 if abs(playerStatus["coordinate"][0]) + abs(playerStatus["coordinate"][1]) == 1:
-                        coord1 = playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0]
-                        coord2 = playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]
-                        game[playerStatus["username"]][0] = [coord1, coord2]
+                        game[playerStatus["username"]][0] = [playerStatus["coordinate"][0] + game[playerStatus["username"]][0][0], playerStatus["coordinate"][1] + game[playerStatus["username"]][0][1]]
                         del noMove[noMove.index(playerStatus["username"])]
 
                 else:
@@ -82,14 +81,11 @@ def update_game():
             return "Hax"
 
         # Return the game with the information you added, in addition to everyone else
-        while (time.time() - timeLeft) < 3:
-                    time.sleep(0.1)
-
-        
-        for player in noMove:
-            RandomMove(player)
-        timeLeft = 3
-        return jsonify(game)
+        if (time.time() - timeLeft) < 3:
+            return jsonify({str(time.time() - timeLeft)})
+        else:
+            timeLeft = time.time()
+            return jsonify(game)
 
 @app.route('/pregame', methods=['GET','POST'])
 def update_players():
@@ -143,4 +139,4 @@ def update_players():
 
 if __name__ == "__main__":
     # app.run(host='0.0.0.0')
-    app.run(debug=True, threaded=True)
+    app.run(host="0.0.0.0")
